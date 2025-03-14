@@ -1,0 +1,787 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/YoRHa.ico">
+  <link rel="icon" href="/img/YoRHa.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="吕书科">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1.微服务入门(1).单体架构与分布式架构单体架构： 将业务的所有功能集中在一个项目中开发，打成一个包部署优点： 架构简单、部署成本低 ； 缺点： 耦合度高项目打包部署到Tomcat，用户直接访问。用户量增加后就多部署几台服务器形成集群。随着互联网发展、一个APP或Web通常都用有相当多的模块，因此出现了 分布式架构分布式架构： 根据业务功能对系统进行拆分，每个业务模块作为独立项目开发，称为一个服">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springCloud图文详解">
+<meta property="og:url" content="http://example.com/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Automata">
+<meta property="og:description" content="1.微服务入门(1).单体架构与分布式架构单体架构： 将业务的所有功能集中在一个项目中开发，打成一个包部署优点： 架构简单、部署成本低 ； 缺点： 耦合度高项目打包部署到Tomcat，用户直接访问。用户量增加后就多部署几台服务器形成集群。随着互联网发展、一个APP或Web通常都用有相当多的模块，因此出现了 分布式架构分布式架构： 根据业务功能对系统进行拆分，每个业务模块作为独立项目开发，称为一个服">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/springCloud.webp">
+<meta property="article:published_time" content="2021-04-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-13T17:29:49.314Z">
+<meta property="article:author" content="吕书科">
+<meta property="article:tag" content="JAVA">
+<meta property="article:tag" content="springCloud">
+<meta property="article:tag" content="微服务">
+<meta property="article:tag" content="RabbitMQ">
+<meta property="article:tag" content="Nacos">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/springCloud.webp">
+  
+  
+  
+  <title>springCloud图文详解 - Automata</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Automata</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/springCloud.webp') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="springCloud图文详解"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-04-27 00:00" pubdate>
+          2021年4月27日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">springCloud图文详解</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="1-微服务入门"><a href="#1-微服务入门" class="headerlink" title="1.微服务入门"></a>1.微服务入门</h2><h3 id="1-单体架构与分布式架构"><a href="#1-单体架构与分布式架构" class="headerlink" title="(1).单体架构与分布式架构"></a>(1).单体架构与<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%88%86%E5%B8%83%E5%BC%8F%E6%9E%B6%E6%9E%84&spm=1001.2101.3001.7020">分布式架构</a></h3><p><strong>单体架构：</strong> 将业务的所有功能集中在一个项目中开发，打成一个包部署<br><strong>优点：</strong> 架构简单、部署成本低 ； <strong>缺点：</strong> <a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E8%80%A6%E5%90%88%E5%BA%A6&spm=1001.2101.3001.7020">耦合度</a>高<br><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E9%A1%B9%E7%9B%AE%E6%89%93%E5%8C%85&spm=1001.2101.3001.7020">项目打包</a>部署到Tomcat，用户直接访问。用户量增加后就多部署几台服务器形成集群。<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/4d12e458c407df098a40c7c9ccf7fcd1.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><code>随着互联网发展、一个APP或Web通常都用有相当多的模块，因此出现了 分布式架构</code><br><strong>分布式架构：</strong> 根据业务功能对系统进行拆分，每个业务模块作为独立项目开发，称为一个服务。<br><strong>优点：</strong> 降低服务耦合、有利于服务升级拓展 ；<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/1bdb03c3f61444bd1618e908376f2453.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs">由于分布式架构的特性我们也出现了一些思考：<br>服务拆分粒度如何?<br>服务集群地址如何维护?<br>服务之间如何实现远程调用?<br>服务健康状态如何感知?<br>为了解决分布式带来的问题，微服务出现了<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-微服务"><a href="#2-微服务" class="headerlink" title="(2).微服务"></a>(2).微服务</h3><p><strong>微服务是一种经过良好架构设计的分布式架构方案，微服务架构特征:</strong><br><strong>单一职责：</strong> 微服务拆分粒度更小，每一个服务都对应唯一的业务能力，做到单一职责，避免重复业务开发<br><strong>面向服务：</strong> 微服务对外暴露业务接口<br>(由于不同模块部署在不同服务器、无法直接调用)<br><strong>自治：</strong> 队独立、技术独立、数据独立、部署独立<br><strong>隔离性强：</strong> 服务调用做好隔离、容错、降级，避免出现级联问题<br>(避免某个模块宕机造成影响)<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/cd80c92c87a1bdb6c7ae9e1fe1d82f8a.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h3 id="3-总结"><a href="#3-总结" class="headerlink" title="(3).总结"></a>(3).总结</h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs makefile">单体架构特点?<br><span class="hljs-section">简单方便，高度耦合，扩展性差，适合小型项目。例如: 学生管理系统</span><br><br>分布式架构特点?<br><span class="hljs-section">松耦合，扩展性好，但架构复杂，难度大。适合大型互联网项目，例如:京东、淘宝</span><br><br><span class="hljs-section">微服务:一种良好的分布式架构方案</span><br><span class="hljs-section">优点: 拆分粒度更小、服务更独立、耦合度更低缺点:架构非常复杂，运维、监控、部署难度提高</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="2-微服务结构"><a href="#2-微服务结构" class="headerlink" title="2.微服务结构"></a>2.微服务结构</h2><h3 id="1-微服务结构"><a href="#1-微服务结构" class="headerlink" title="(1).微服务结构"></a>(1).微服务结构</h3><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/2b96b7f67df624d90b69a6d726de8d37.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs armasm">在微服务架构中，配置中心和注册中心是两个重要的组件。<br>配置中心用来统一管理项目中所有配置，各种参数、各种开关，全部都放到一个集中的地方进行统一管理，并提供一套标准的接口。当各个服务需要获取配置的时候，就来「配置中心」的接口拉取。<br>注册中心则是用来管理服务实例的注册和发现的。各个服务实例在启动时会向注册中心注册自己的信息（如<span class="hljs-built_in">IP</span>地址和端口号），其他服务实例可以通过注册中心来发现并调用这些服务<span class="hljs-number">12</span>。<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-微服务技术对比"><a href="#2-微服务技术对比" class="headerlink" title="(2).微服务技术对比"></a>(2).微服务技术对比</h3><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/95d0efa54e81b7f115180d416d611821.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h3 id="3-企业需求"><a href="#3-企业需求" class="headerlink" title="(3).企业需求"></a>(3).企业需求</h3><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/1b870d07852c52e01ca2974c4bf445ff.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h3 id="4-SpringCloud"><a href="#4-SpringCloud" class="headerlink" title="(4).SpringCloud"></a>(4).SpringCloud</h3><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/0fadfb5a4a2d0347b67583cbedf26e49.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<hr>
+<h2 id="3-服务拆分及远程调用"><a href="#3-服务拆分及远程调用" class="headerlink" title="3.服务拆分及远程调用"></a>3.服务拆分及远程调用</h2><h3 id="1-服务拆分注意事项"><a href="#1-服务拆分注意事项" class="headerlink" title="(1).服务拆分注意事项"></a>(1).服务拆分注意事项</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs">1.不同微服务，不要重复开发相同业务<br>2.微服务数据独立，不要访问其它微服务的数据库<br>3.微服务可以将自己的业务暴露为接口，供其它微服务调用<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-微服务远程调用"><a href="#2-微服务远程调用" class="headerlink" title="(2).微服务远程调用"></a>(2).微服务远程调用</h3><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver"><span class="hljs-number">1.</span>基于RestTemplate发起的<span class="hljs-keyword">http</span>请求实现远程调用<br><span class="hljs-number">2.</span><span class="hljs-keyword">http</span>请求做远程调用是与语言无关的调用，只要知道对方的ip、端口、接口路径、请求参数即可。<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-微服务远程调用Demo"><a href="#3-微服务远程调用Demo" class="headerlink" title="(3).微服务远程调用Demo"></a>(3).微服务远程调用Demo</h3><p>假设存在两个微服务： <code>用户模块</code> 与 <code>订单模块</code>，两个模块的数据库表中有一个 <code>id字段</code>相同<br>用户访问<code>订单模块</code>后同时也会返回用户信息。因此用户访问订单模块之后，也需要后端去访问用户模块获取用户信息。之后将信息结合返回给用户。<br><strong>①： 注册RestTemplate进入IOC</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/d89307d6f12c046bef9f18e119ee3a87.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong>①： 修改service层</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/bffe99b36f766cbb0457ed42b101fa73.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h3 id="4-提供者与消费者"><a href="#4-提供者与消费者" class="headerlink" title="(4).提供者与消费者"></a>(4).提供者与消费者</h3><p><strong>服务提供者：</strong> 一次业务中，被其它微服务调用的服务。(提供接口给其它微服务)<br><strong>服务消费者：</strong> 一次业务中，调用其它微服务的服务。(调用其它微服务提供的接口)<br>一个服务既可以是提供者也可以是消费者，要根据具体的业务和情况来判断</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs">第三点Demo中，我们服务在请求服务的时候，restTemplate访问的地址是固定的。<br>可在实际开发中通常都会有好几个环境，开发，测试等等环境。每个环境的地址都在变化<br>因此出现了几个问题：<br>1.服务消费者该如何获取服务提供者的地址信息?<br>2.如果有多个服务提供者，消费者该如何选择?<br></code></pre></td></tr></table></figure>
+
+<p>因此引出我们的 <code>Eureka注册中心</code></p>
+<h3 id="5-Eureka作用"><a href="#5-Eureka作用" class="headerlink" title="(5).Eureka作用"></a>(5).Eureka作用</h3><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/ef9d57ef61fd24899862e7ebc42904ba.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs">消费者该如何获取服务提供者具体信息?<br>①：服务提供者启动时向eureka注册自己的信息<br>②：eureka保存这些信息<br>③：消费者根据服务名称向eureka拉取提供者信息<br><br>如果有多个服务提供者，消费者该如何选择?<br>①：服务消费者利用负载均衡算法，从服务列表中挑选一个<br><br>消费者如何感知服务提供者健康状态?<br>①：服务提供者会每隔30秒向EurekaServer发送心跳请求，报告健康状态<br>②：eureka会更新记录服务列表信息，心跳不正常会被剔除<br>③：消费者就可以拉取到最新的信息<br></code></pre></td></tr></table></figure>
+
+<p>在Eureka架构中，微服务角色有两类<br>EurekaServer：服务端，注册中心<br>记录服务信息<br>心跳监控</p>
+<p>EurekaClient:客户端<br>Provider: 服务提供者，例如案例中的 user-servicea<br>注册自己的信息到EurekaServer<br>每隔30秒向EurekaServer发送心跳<br>consumer:服务消费者，例如案例中的 order-service根据服务名称从EurekaServer拉取服务列表<br>基于服务列表做负载均衡，选中一个微服务后发起远程调用</p>
+<h3 id="6-搭建EurekaServer"><a href="#6-搭建EurekaServer" class="headerlink" title="(6).搭建EurekaServer"></a>(6).搭建EurekaServer</h3><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/774fe6588f7f96eee27d08ab3acf2d4f.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>如何把微服务也注册到Eureka，都是一个套路，<code>加依赖、配置yml</code><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/fff3a1c89f020ba0c1d4f166658ecf93.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/e03bd5817853c592104819889401b3f7.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><code>可以在Eureka中部署多个实例。这样可以提高系统的可靠性和容错能力</code><br><strong>服务拉取</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/ad53eeb3e0997f9826dc94e0a27e6bf7.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<p><strong>1.搭建EurekaServer</strong><br>引入eureka-server依赖<br>添加@EnableEurekaServer注解<br>在application.yml中配置eureka地址<br><strong>2.服务注册</strong><br>引入eureka-client依赖<br>在application.yml中配置eureka地址<br><strong>3.服务发现</strong><br>引入eureka-client依赖<br>在application.yml中配置eureka地址<br>给RestTemplate添加@LoadBalanced注解<br>用服务提供者的服务名称远程调用</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">整个过程当中我们只需要配置好Eureka，就自动做到了负载均衡、拉取服务，那么这些事情到底是怎么完成的呢？<br></code></pre></td></tr></table></figure>
+
+<h3 id="7-Ribbon负载均衡"><a href="#7-Ribbon负载均衡" class="headerlink" title="(7).Ribbon负载均衡"></a>(7).Ribbon负载均衡</h3><h4 id="①：负载均衡流程"><a href="#①：负载均衡流程" class="headerlink" title="①：负载均衡流程"></a>①：负载均衡流程</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/6c8b4d23cd2b5555378977a1b9d66201.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="②：负载均衡策略"><a href="#②：负载均衡策略" class="headerlink" title="②：负载均衡策略"></a>②：负载均衡策略</h4><p>Ribbon的负载均衡规则是一个叫做IRule的接口来定义的，每一个子接口都是一种规则<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/38a4345f948b4ca4daf6a01dab7bf58c.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/f9751b76e9294043090cc09ee562c602.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="③：负载均衡策略"><a href="#③：负载均衡策略" class="headerlink" title="③：负载均衡策略"></a>③：负载均衡策略</h4><p>Ribbon默认是采用懒加载，即第一次访问时才会去创建LoadBalanceClient，请求时间会很长.而饥饿加载则会在项目启动时创建，降低第一次访问的耗时，通过下面配置开启饥饿加载:<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/5a218dfc2384f17ff95f2a0e0ee38a3d.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs makefile">1.Ribbon负载均衡规则<br>规则接口是IRule<br>默认实现是ZoneAvoidanceRule，根据zone选择服务列表，然后轮询<br><br>2.负载均衡自定义方式<br><span class="hljs-section">代码方式:配置灵活，但修改时需要重新打包</span><br><span class="hljs-section">配置方式:直观，方便，无需重新打包发布但是无法做全局配置</span><br><br>3.饥饿加载<br>开启饥饿加载<br>指定饥饿加载的微服务名称<br></code></pre></td></tr></table></figure>
+
+<h3 id="8-Nacos注册中心"><a href="#8-Nacos注册中心" class="headerlink" title="(8).Nacos注册中心"></a>(8).Nacos注册中心</h3><h4 id="①：Nacos基础Linux的安装配置"><a href="#①：Nacos基础Linux的安装配置" class="headerlink" title="①：Nacos基础Linux的安装配置"></a>①：Nacos基础Linux的安装配置</h4><p>下载[Nacos安装配置教程](<a target="_blank" rel="noopener" href="https://blog.csdn.net/Mr_7777777/article/details/123133036?ops_request_misc=%7B%22request_id%22:%22168535604516782425117446%22,%22scm%22:%2220140713.130102334..%22%7D&request_id=168535604516782425117446&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-123133036-null-null.142%5Ev88%5Econtrol_2,239%5Ev2%5Einsert_chatgpt&utm_term=Nacos">https://blog.csdn.net/Mr_7777777/article/details/123133036?ops_request_misc=%7B%22request%5Fid%22%3A%22168535604516782425117446%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&amp;request_id=168535604516782425117446&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-123133036-null-null.142^v88^control_2,239^v2^insert_chatgpt&amp;utm_term=Nacos</a> Linux&amp;spm&#x3D;1018.2226.3001.4187)</p>
+<p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/7a0f531e4b62aac96d17c6ef7cfc8101.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/a60a5cb8aba7d89b2f81043dab2ecf8b.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="②：服务注册到Nacos"><a href="#②：服务注册到Nacos" class="headerlink" title="②：服务注册到Nacos"></a>②：服务注册到Nacos</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!--父工程管理依赖--&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-alibaba-dependencies<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>       <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2021.1<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>pom<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>import<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-comment">&lt;!--Nacos客户端依赖包--&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2021.1<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong><code>代码的道路哪有一帆风顺，这里提一下我遇到的问题</code></strong><br><code>Caused by: java.lang.ClassNotFoundException: org.springframework.boot.Bootstrapper</code><br>这个报错主要原因是springcloud与springboot版本之间的问题。<br><a target="_blank" rel="noopener" href="https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E">打开查看spring alibaba、springcloud、springboot对应版本</a></p>
+<h4 id="③：demo演示"><a href="#③：demo演示" class="headerlink" title="③：demo演示"></a>③：demo演示</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/cada4b99f4404b018596647f6b1604da.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/e4e0affb453c5e214963f51d8f0a090e.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="④：Nacos服务分级存储模型"><a href="#④：Nacos服务分级存储模型" class="headerlink" title="④：Nacos服务分级存储模型"></a>④：Nacos服务分级存储模型</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/0b2d62dccc1a8ef27d4f3660fe019349.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑤：服务跨集群调用问题"><a href="#⑤：服务跨集群调用问题" class="headerlink" title="⑤：服务跨集群调用问题"></a>⑤：服务跨集群调用问题</h4><p>服务调用尽可能选择本地集群的服务，跨集群调用延迟较高<br>本地集群不可访问时候、再去访问其他集群<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/5d6b22a88212c9faa37462db6bc5be1b.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑥：服务集群属性"><a href="#⑥：服务集群属性" class="headerlink" title="⑥：服务集群属性"></a>⑥：服务集群属性</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/645e75906be763ca4b926f619107fb4b.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑥：根据集群负载均衡"><a href="#⑥：根据集群负载均衡" class="headerlink" title="⑥：根据集群负载均衡"></a>⑥：根据集群负载均衡</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/28f2d12b3ad5a7cbb97ee11073a97457.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑦：根据权重负载均衡"><a href="#⑦：根据权重负载均衡" class="headerlink" title="⑦：根据权重负载均衡"></a>⑦：根据权重负载均衡</h4><p><strong>实际部署中会出现这样的场景</strong><br>服务器设备性能有差异，部分实例所在机器性能较好，另一些较差，我们希望性能好的机器承担更多的用户请求<br>Nacos提供了权重配置来控制访问频率，权重越大则访问频率越高</p>
+<p>包括服务器的升级、我们可以使用权重来使得某个微服务无人访问，然后停机升级。这样也不会影响正在使用的用户</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs">实例的权重控制<br>Nacos控制台可以设置实例的权重值，0~1之间<br>同集群内的多个实例，权重越高被访问的频率越高<br>权重设置为0则完全不会被访问<br></code></pre></td></tr></table></figure>
+
+<h4 id="⑧：环境隔离-namespace"><a href="#⑧：环境隔离-namespace" class="headerlink" title="⑧：环境隔离 - namespace"></a>⑧：环境隔离 - namespace</h4><p>Nacos中服务存储和数据存储的最外层都是一个名为namespace的东西，用来做最外层隔离<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/86325dac1cb5ea252ca5ca5812907054.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong>搭建过程</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/167d66ce8d1aca0aa5db60e5aa43574b.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/14d0ba9b75fff7ead326dd8f38d8fca0.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/50cd88dd00acd3a87d1a7dfac9533cbe.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/905f74f731e8822e674c9e69213f5fae.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs angelscript">Nacos环境隔离<br><span class="hljs-keyword">namespace</span>用来做环境隔离<br>每个<span class="hljs-symbol">namespace</span>都有唯一<span class="hljs-symbol">id</span><br>不同<span class="hljs-symbol">namespace</span>下的服务不可见<br></code></pre></td></tr></table></figure>
+
+<h4 id="⑨：nacos注册中心细节分析"><a href="#⑨：nacos注册中心细节分析" class="headerlink" title="⑨：nacos注册中心细节分析"></a>⑨：nacos注册中心细节分析</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/64a6cff1b18316f7becadab3af5f4a17.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑩：临时实例与非临时实例"><a href="#⑩：临时实例与非临时实例" class="headerlink" title="⑩：临时实例与非临时实例"></a>⑩：临时实例与非临时实例</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/b2ff5952c853c62153b6c25bcdd42b61.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs scss">临时实例的情况下，如果你终止程序，过<span class="hljs-number">30s</span>，到nacos中查看就会发现爆红然后直接消失(被nacos踢出)<br>非临时实例终止程序，nacos中查看该服务爆红，但不会踢出。重新启动非临时实力即可<br></code></pre></td></tr></table></figure>
+
+<h4 id="nacos与eureka的区别"><a href="#nacos与eureka的区别" class="headerlink" title="nacos与eureka的区别"></a>nacos与eureka的区别</h4><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs stata">1.Nacos与eureka的共同点<br>   都支持服务注册和服务拉取<br>   都支持服务提供者心跳方式做健康检测<br>2.Nacos与Eureka的区别<br>   Nacos支持服务端主动检测提供者状态:临时实例采用心跳模式，非临时实例采用主动检测模式<br>   临时实例心跳不正常会被剔除，非临时实例则不会被剔除<br>   Nacos支持服务列表变更的消息推送模式，服务列表更新更及时<br>   Nacos集群默认采用<span class="hljs-keyword">AP</span>方式，当集群中存在非临时实例时，采用CP模式 ； Eureka采用<span class="hljs-keyword">AP</span>方式<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="9-微服务架构组件"><a href="#9-微服务架构组件" class="headerlink" title="(9).微服务架构组件"></a>(9).微服务架构组件</h3><h4 id="①：Nacos配置管理"><a href="#①：Nacos配置管理" class="headerlink" title="①：Nacos配置管理"></a>①：Nacos配置管理</h4><p><strong>配置更改热更新</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/9d909fe22cc27fe04d2bf0b5c9056677.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong><code>注</code>:</strong> Nacos配置文件中的内容不是随便写的，不是把项目中的yml配置文件拉进去就可以了，我们只写一些通用的、需要热更新的内容。<br>像数据库地址一般都是固定的，就不必写。<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/dd1aff8395f904165ab64ed9dc6fa032.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong>data ID</strong>: <code>服务器名-开发环境-后缀名</code><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/9c0c4661537848900b9d7470ca51f692.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>如此一来我们就配置好了，接下来就需要将微服务连接上配置</p>
+<h4 id="②：统一配置管理"><a href="#②：统一配置管理" class="headerlink" title="②：统一配置管理"></a>②：统一配置管理</h4><p>服务获取配置的步骤、顺序如下：<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/9cd8aca739d81959b734be4d1c24a660.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/0e2ec76a6da339fa08bf9d41303baedb.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong><code>注意：</code></strong> <code>springboot 2.4以后，bootstrap默认关闭，你需要添加依赖</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>         <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>         <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-starter-bootstrap<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>         <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>3.1.1<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>     <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/0cbf0c611b5f0cad0efe077f3ca45f9a.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/039064d79916d641e3a0a3c117c8658e.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>这个配置在微服务本地配置是不存在的，也是刚刚在nacos当中的配置。<br>输出的日期与nacos配置当中一直，这就 <strong><code>说明我们确实获取到了nacos中的配置</code></strong></p>
+<h4 id="③：热更新配置"><a href="#③：热更新配置" class="headerlink" title="③：热更新配置"></a>③：热更新配置</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/0cfa2c934f759de61c7bee77505bfa66.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/a8657c497e2d70b5ece4c4333725c23c.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="④：多环境配置共享"><a href="#④：多环境配置共享" class="headerlink" title="④：多环境配置共享"></a>④：多环境配置共享</h4><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs dts">共享前提： 微服务的bootstrap配置名相同<br><span class="hljs-symbol">spring:</span><br><span class="hljs-symbol">  application:</span><br><span class="hljs-symbol">    name:</span> orderService<br></code></pre></td></tr></table></figure>
+
+<p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/ffc2d9e3f2f3c138c643b920027cf527.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/c84f9d41fc57754b4b0275fe093cfc68.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong>关于配置的拆分管理</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/ce8a1382f161ef4c49fc93ef954f4b06.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/2ebe204f51455c9b9a1059374667fdf9.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑤：nacos集群搭建"><a href="#⑤：nacos集群搭建" class="headerlink" title="⑤：nacos集群搭建"></a>⑤：nacos集群搭建</h4><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1LQ4y127n4/?p=29&spm_id_from=pageDriver&vd_source=fffda8b3a01eb4075c626d7e911534d5">点击观看</a></p>
+<p><strong>1.搭建MySQL集群并初始化数据库表<br>2.下载解压nacos<br>3.修改集群配置(节点信息)、数据库配置<br>4.分别启动多个nacos节点<br>5.nginx反向代理</strong></p>
+<p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/e808bba0dc00c8faffc1207b64119ba9.png" srcset="/img/loading.gif" lazyload alt="## (10).http客户端Feign"></p>
+<h4 id="⑥：RestTemplate方式调用存在的问题"><a href="#⑥：RestTemplate方式调用存在的问题" class="headerlink" title="⑥：RestTemplate方式调用存在的问题"></a>⑥：RestTemplate方式调用存在的问题</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/c9468600978416c7f7f2408e117a0d92.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>这样的代码<code>可读性差、参数复杂URL难以维护</code></p>
+<h4 id="⑦：Feign声明式http客户端"><a href="#⑦：Feign声明式http客户端" class="headerlink" title="⑦：Feign声明式http客户端"></a>⑦：Feign声明式http客户端</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/3d51b3c9af9ad6bfeff83215fe6f6bdb.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><code>feignclient 客户端名字根据你服务名来的，可以要yml文件中查看，需要调用哪个服务就放哪个名字进去</code><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/4695dbb26acf52fce7d05245a0f628e0.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑧：自定义Feign配置"><a href="#⑧：自定义Feign配置" class="headerlink" title="⑧：自定义Feign配置"></a>⑧：自定义Feign配置</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/2dc1061eac7425a398142d5134ca7879.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/d0f8e06c563fc23e9fc9de25a370b84c.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/c94bf459228e176d4704d16f504ef0b6.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs stylus">方式一是配置文件，feign<span class="hljs-selector-class">.client</span><span class="hljs-selector-class">.config</span><span class="hljs-selector-class">.xxx</span><span class="hljs-selector-class">.loggerLevel</span><br>如果xxx是default则代表全局<br>如果xxx是服务名称，例如userservice则代表某服务<br><br>方式二是java代码配置Logger.Level这个Bean<br>如果在@EnableFeignClients注解声明则代表全局<br>如果在@FeignClient注解中声明则代表某服务<br></code></pre></td></tr></table></figure>
+
+<h4 id="⑨：Feign性能调优"><a href="#⑨：Feign性能调优" class="headerlink" title="⑨：Feign性能调优"></a>⑨：Feign性能调优</h4><p><strong>Feign底层的客户端实现</strong><br><strong>URLConnection：</strong> 默认实现，不支持连接池<br><strong>Apache HttpClient：</strong> 支持连接池<br><strong>OKHttp：</strong> 支持连接池<br><code>我们知道没有连接池的情况下，需要每次都重连和断开，影响性能</code></p>
+<p><strong>因此优化Feign的性能主要包括:</strong><br>使用连接池代替默认的URLConnection<br>日志级别，最好用basic或none</p>
+<p><strong>如何添加HttpClient？</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/5b693faea50683cd8cba0c301bc4bf6d.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/55c1e5496294aa68c8900bbeff5182ba.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/fdeea3eb4d6f55363841d4fcbdfef4af.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/02807994e3f7f27545a8513afc34a1ac.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<hr>
+<h2 id="4-更进一步"><a href="#4-更进一步" class="headerlink" title="4.更进一步"></a>4.更进一步</h2><h3 id="1-统一网关Gateway"><a href="#1-统一网关Gateway" class="headerlink" title="(1).统一网关Gateway"></a>(1).统一网关Gateway</h3><h4 id="①：为什么需要网关"><a href="#①：为什么需要网关" class="headerlink" title="①：为什么需要网关"></a>①：为什么需要网关</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/7351ff33e83900b223700888fabd246a.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/38bb20fbb31ae25f91743288dea89896.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="②：搭建网关服务"><a href="#②：搭建网关服务" class="headerlink" title="②：搭建网关服务"></a>②：搭建网关服务</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/36a200b1eafa6fc49d3a41b47bbf086f.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/daa7661cb3d4e7309ecdab478e93a35b.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong>网关作用流程</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/82639b440238f30460bc2caffd3fc366.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="③：路由断言工厂"><a href="#③：路由断言工厂" class="headerlink" title="③：路由断言工厂"></a>③：路由断言工厂</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/3e6171c809f3f215f4369591bfe277d5.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong><code>关于断言工厂为什么不是过滤器</code></strong></p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver">断言工厂是用来匹配请求的，比方说有很多微服务交由网关管理。<br>每个微服务都有不同的断言 工厂配置，有的微服务必须几点之前、有的微服务必须什么IP<br>当前端发来<span class="hljs-built_in">URL</span>，请求的时候，<span class="hljs-built_in">URL</span>会跟配置中比较<br>满足断言工厂配置条件的才能找到对应的服务并响应<br></code></pre></td></tr></table></figure>
+
+<p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/0171dcfb5c1847fb2398701e66b8f9b8.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>如果你访问<code>localhost:88/hello?url=baidu</code>它会自动跳转到，<code>www.baidu.com/hello</code></p>
+<h4 id="④：路由过滤器GatewayFilter"><a href="#④：路由过滤器GatewayFilter" class="headerlink" title="④：路由过滤器GatewayFilter"></a>④：路由过滤器GatewayFilter</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/25e0d0d093fc419d5222af56b1bc7f62.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑤：全局过滤器GlobalFilter"><a href="#⑤：全局过滤器GlobalFilter" class="headerlink" title="⑤：全局过滤器GlobalFilter"></a>⑤：全局过滤器GlobalFilter</h4><p>全局过滤器的作用也是处理一切进入网关的请求和微服务响应，与GatewayFilter的作用一样。<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/86c3abb833cd15fc6c767b3d923907b3.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑥：过滤器执行顺序"><a href="#⑥：过滤器执行顺序" class="headerlink" title="⑥：过滤器执行顺序"></a>⑥：过滤器执行顺序</h4><p>请求进入网关会碰到三类过滤器： 当前路由的过滤器、DefaultFilter、GlobalFilter<br>请求路由后，会将当前路由过滤器和DefaultFilter、GlobalFilter，合并到一个过滤器链 (集合)中，排序后依次执行每个过滤器<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/59289714e921b225d736e978782fa152.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<p><strong>1、</strong> 每一个过滤器都必须指定一个int类型的order值，order值越小，优先级越高，执行顺序越靠前<br><strong>2、</strong> GlobalFilter通过实现Ordered接口，或者添加@Order注解来指定order值，由我们自己指定<br><strong>3、</strong> 路由过滤器和defaultFilter的order由Spring指定，默认是按照声明顺序从1递增<br><strong>4、</strong> 当过滤器的order值一样时，会按照 defaultFilter &gt; 路由过滤器&gt;GlobalFilter的顺序执行</p>
+<h4 id="⑦：跨域问题处理"><a href="#⑦：跨域问题处理" class="headerlink" title="⑦：跨域问题处理"></a>⑦：跨域问题处理</h4><p>**跨域：**域名不一致就是跨域，主要包括：<br>域名不同： <a target="_blank" rel="noopener" href="http://www.taobao.com/">www.taobao.com</a> 、<a target="_blank" rel="noopener" href="http://www.taobao.org/">www.taobao.org</a><br>域名相同： 端口不同： localhost:8080、 localhost:8081<br>跨域问题： 浏览器禁止请求的发起者与服务端发生跨域ajax请求，请求被浏览器拦截的问题<br>解决方案： CORS<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/c9d21bb92c16f21fbdf236e1fb7f0c32.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h3 id="2-Docker"><a href="#2-Docker" class="headerlink" title="(2).Docker"></a>(2).Docker</h3><h4 id="①：初始Docker"><a href="#①：初始Docker" class="headerlink" title="①：初始Docker"></a>①：初始Docker</h4><p>Docker是一个快速交付应用、运行应用的技术<br>1.可以将程序及其依赖、运行环境一起打包为一个镜像<br>可以迁移到任意Linux操作系统<br>2.运行时利用沙箱机制形成隔离容器，各个应用互不干扰<br>3.启动、移除都可以通过一行命令完成，方便快捷<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/7eb07cf75ab644e4e77ec6136c35caaa.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="②：Docker与虚拟机"><a href="#②：Docker与虚拟机" class="headerlink" title="②：Docker与虚拟机"></a>②：Docker与虚拟机</h4><p>Docker和虚拟机的差异<br>docker是一个系统进程 ； <code>虚拟机</code>是在操作系统中的操作系统<br>docker体积小、启动速度快、性能好 ； <code>虚拟机</code>体积大、启动速度慢、性能一般</p>
+<h4 id="③：镜像和容器"><a href="#③：镜像和容器" class="headerlink" title="③：镜像和容器"></a>③：镜像和容器</h4><p><strong>镜像(Image)：</strong> Docker将应用程序及其所需的依赖、函数库、环境、配置等文件打包在一起，称为镜像。<br><strong>容器(Container)：</strong> 镜像中的应用程序运行后形成的进程就是容器，只是Docker会给容器做隔离，对外不可见。<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/7d9239a633853dfdb6774c28ef171554.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="④：镜像和容器"><a href="#④：镜像和容器" class="headerlink" title="④：镜像和容器"></a>④：镜像和容器</h4><p>Docker是一个CS架构的程序，由两部分组成:<br><strong>服务端(server)：</strong> Docker守护进程，负责处理Docker指令，管理镜像、容器等<br><strong>客户端(client)：</strong> 通过命令或RestAPI向Docker服务端发送指令。可以在本地或远程向服务端发送指令<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/af1aed00726a2c58526256b1fbba1e43.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑤：Docker安装与常用命令"><a href="#⑤：Docker安装与常用命令" class="headerlink" title="⑤：Docker安装与常用命令"></a>⑤：Docker安装与常用命令</h4><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41394654/article/details/126083766?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2~default~CTRLIST~Rate-2-126083766-blog-113856681.235%5Ev38%5Epc_relevant_sort_base3&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~CTRLIST~Rate-2-126083766-blog-113856681.235%5Ev38%5Epc_relevant_sort_base3&utm_relevant_index=3">关于Docker的安装</a></p>
+<h4 id="⑥：数据卷"><a href="#⑥：数据卷" class="headerlink" title="⑥：数据卷"></a>⑥：数据卷</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/f4fe9110c4dead240c7573313c7cc392.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/d0c30a17d2849ed52de4c7e4de1cc494.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h3 id="3-MQ"><a href="#3-MQ" class="headerlink" title="(3).MQ"></a>(3).MQ</h3><h4 id="①：同步与异步"><a href="#①：同步与异步" class="headerlink" title="①：同步与异步"></a>①：同步与异步</h4><p>同步通讯的优点：<code>时效性强、可以立即得到结果</code><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/f8376ca941b0af01c01dca86f793f8de.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><strong>同步存在的问题：</strong><br><code>耦合度高</code><br>每次加入新的需求，都要修改原来的代码<br><code>性能下降</code><br>调用者需要等待服务提供者响应，如果调用链过长则响应时间等于每次调用的时间之和。<br><code>资源浪费</code><br>调用链中的每个服务在等待响应过程中，不能释放请求占用的资源，高并发场景下会极度浪费系统资源<br><code>级联失败</code><br>如果服务提供者出现问题，所有调用方都会跟着出问题如同多米诺骨牌一样，迅速导致整个微服务群故障</p>
+<h4 id="②：异步调用方案"><a href="#②：异步调用方案" class="headerlink" title="②：异步调用方案"></a>②：异步调用方案</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/e460c525e52d53f38f27cf91295f518f.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">此时支付服务不需要像同步调用时、停下来等待其他服务完成再返回。而是可以直接返回<br></code></pre></td></tr></table></figure>
+
+<p>以往如果你需要在支付服务中调用其他服务，由于是同步调用，你必须等待其他服务响应。<br>一旦需要增加某个服务，你又要修改代码。耦合度很高，但是现在你只需要让服务订阅Broker就可以<br><code>流量削峰</code><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/74194660d748070abfe50c1e3e0a4504.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="③：什么是MQ"><a href="#③：什么是MQ" class="headerlink" title="③：什么是MQ"></a>③：什么是MQ</h4><p><strong>MQ(MessageQueue)：</strong> 中文是消息队列，字面来看就是存放消息的队列。也就是事件驱动架构中的Broker。<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/19eeac5b723f3199b0ed6d0fb57731a1.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h3 id="4-RabbitMQ快速入门"><a href="#4-RabbitMQ快速入门" class="headerlink" title="(4).RabbitMQ快速入门"></a>(4).RabbitMQ快速入门</h3><h4 id="①：RabbitMQ"><a href="#①：RabbitMQ" class="headerlink" title="①：RabbitMQ"></a>①：RabbitMQ</h4><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_51560103/article/details/121492937?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_utm_term~default-0-121492937-blog-124337419.235%5Ev38%5Epc_relevant_sort_base3&spm=1001.2101.3001.4242.1&utm_relevant_index=1">RabbitMQ安装</a><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/352a726e4fa08b6c9c145416e6d65f4f.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -d --name rabbitmq -e RABBITMQ_DEFAULT_USER=root -e RABBITMQ_DEFAULT_PASS=<span class="hljs-number">123456</span> -p <span class="hljs-number">15672</span>:<span class="hljs-number">15672</span> -p <span class="hljs-number">5672</span>:<span class="hljs-number">5672</span> -p <span class="hljs-number">25673</span>:<span class="hljs-number">25673</span> -p <span class="hljs-number">61613</span>:<span class="hljs-number">61613</span> -p <span class="hljs-number">1883</span>:<span class="hljs-number">1883</span> rabbitmq:management<br></code></pre></td></tr></table></figure>
+
+<h4 id="②：SpringAMQP"><a href="#②：SpringAMQP" class="headerlink" title="②：SpringAMQP"></a>②：SpringAMQP</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/ae8951dce07bf71116c44a5a43025084.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/9763bee7cffef57ec67a6739e4f29cbd.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/16924c67832d0a5881aa02852cec7416.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/cb43a04e508f954cbd3b5c7697f4a1a5.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/eb4b6a41da36677fc30a695bee0b9568.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/df1fc022c07a38c16b95afb28efcd86b.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>当预取值改为1、消费者会等响应完一条消息之后再从队列中取一条消息。这样一来就做到了“能者多劳”的效果</p>
+<h4 id="③：发布、订阅"><a href="#③：发布、订阅" class="headerlink" title="③：发布、订阅"></a>③：发布、订阅</h4><p>发布订阅模式与之前案例的区别就是允许将同一消息发送给多个消费者。实现方式是加入了exchange(交换机)<br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/341b85b4487d4630b45ecd0a8d0e9887.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><strong>绑定队列与交换机：</strong><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/8fd457692a661ddee1db4ba63d1a71e5.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="④：DirectExchange"><a href="#④：DirectExchange" class="headerlink" title="④：DirectExchange"></a>④：DirectExchange</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/ba6d77af8e8e87e3e6c4b0fd80a3bc5f.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/0ca2cdfbd4d529fdf211675e874558b5.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/21a9c873f0d4a97e2fabd9f6491e3360.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs aspectj">描述下Direct交换机与Fanout交换机的差异?<br>Fanout交换机将消息路由给每一个与之绑定的队列<br>Direct交换机根据RoutingKey判断路由给哪个队列<br>如果多个队列具有相同的RoutingKey，则与Fanout功能类似<br><br>基于<span class="hljs-meta">@RabbitListener</span>注解声明队列和交换机有哪些常见注解?<br><span class="hljs-meta">@Queue</span><br><span class="hljs-meta">@Exchange</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="⑤：TopicExchange"><a href="#⑤：TopicExchange" class="headerlink" title="⑤：TopicExchange!"></a>⑤：TopicExchange!</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/28ddbc50392e34a0968c1bd13b619b81.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/da5ed83861909b19758bb60014a988f2.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/35432d2323fe021a0e50329e7dadb07b.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h4 id="⑥：SpringAMQP消息转换器"><a href="#⑥：SpringAMQP消息转换器" class="headerlink" title="⑥：SpringAMQP消息转换器"></a>⑥：SpringAMQP消息转换器</h4><p><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/efa3180762d6724c58b4dfde0fa6cbc9.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br><img src="/2021/04/27/springCloud%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/1c556749c28f2839af95bffe77febe04.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/JAVA/" class="category-chain-item">JAVA</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/JAVA/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" class="category-chain-item">微服务</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/JAVA/" class="print-no-link">#JAVA</a>
+      
+        <a href="/tags/springCloud/" class="print-no-link">#springCloud</a>
+      
+        <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" class="print-no-link">#微服务</a>
+      
+        <a href="/tags/RabbitMQ/" class="print-no-link">#RabbitMQ</a>
+      
+        <a href="/tags/Nacos/" class="print-no-link">#Nacos</a>
+      
+        <a href="/tags/Docker/" class="print-no-link">#Docker</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>springCloud图文详解</div>
+      <div>http://example.com/2021/04/27/springCloud图文详解/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>吕书科</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2021年4月27日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/09/24/Kafka%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/" title="Kafka图文详解">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Kafka图文详解</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/04/22/Redis%E5%9B%BE%E6%96%87%E8%AF%A6%E8%A7%A3/" title="Redis图文详解">
+                        <span class="hidden-mobile">Redis图文详解</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
