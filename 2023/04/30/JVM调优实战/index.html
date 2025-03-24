@@ -1,0 +1,1424 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/YoRHa.ico">
+  <link rel="icon" href="/img/YoRHa.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="吕书科">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="一、JVM调优步骤在项目开发过程中、生产环境中，任何问题的解决、性能的调优总结下来都是三个步骤，即发现问题、定位问题、解决问题，本文将从这个步骤入手，详细阐述内存溢出（OOM、OutOfMemeory）、CPU飙高、GC频繁等JVM问题的排查、定位，以及调优。   监控发现问题 工具分析问题  性能调优  二、监控发现问题通过监控工具例如Prometheus+Grafana，监控服务器有没有以下情">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM调优实战">
+<meta property="og:url" content="https://aotomata.me/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:site_name" content="Automata">
+<meta property="og:description" content="一、JVM调优步骤在项目开发过程中、生产环境中，任何问题的解决、性能的调优总结下来都是三个步骤，即发现问题、定位问题、解决问题，本文将从这个步骤入手，详细阐述内存溢出（OOM、OutOfMemeory）、CPU飙高、GC频繁等JVM问题的排查、定位，以及调优。   监控发现问题 工具分析问题  性能调优  二、监控发现问题通过监控工具例如Prometheus+Grafana，监控服务器有没有以下情">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://aotomata.me/img/jvm.jpg">
+<meta property="article:published_time" content="2023-04-29T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-24T18:38:57.557Z">
+<meta property="article:author" content="吕书科">
+<meta property="article:tag" content="JAVA">
+<meta property="article:tag" content="JVM">
+<meta property="article:tag" content="调优">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aotomata.me/img/jvm.jpg">
+  
+  
+  
+  <title>JVM调优实战 - Automata</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"aotomata.me","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Automata</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/jvm.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="JVM调优实战"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-04-30 00:00" pubdate>
+          2023年4月30日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          11k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          94 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">JVM调优实战</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="一、JVM调优步骤"><a href="#一、JVM调优步骤" class="headerlink" title="一、JVM调优步骤"></a>一、<strong>JVM</strong>调优步骤</h2><p>在项目开发过程中、生产环境中，任何问题的解决、性能的调优总结下来都是三个步骤，即发现问题、定位问题、解决问题，本文将从这个步骤入手，详细阐述内存溢出（OOM、OutOfMemeory）、CPU飙高、GC频繁等JVM问题的排查、定位，以及调优。 </p>
+<ol>
+<li>监控发现问题</li>
+<li>工具分析问题 </li>
+<li>性能调优</li>
+</ol>
+<h2 id="二、监控发现问题"><a href="#二、监控发现问题" class="headerlink" title="二、监控发现问题"></a>二、监控发现问题</h2><p>通过监控工具例如Prometheus+Grafana，监控服务器有没有以下情况，有的话需要调优：</p>
+<ul>
+<li>GC频繁</li>
+<li>CPU负载过高</li>
+<li>OOM</li>
+<li>内存泄露</li>
+<li>死锁</li>
+<li>程序响应时间较长</li>
+</ul>
+<h2 id="三、工具定位问题"><a href="#三、工具定位问题" class="headerlink" title="三、工具定位问题"></a>三、工具定位问题</h2><p>使用分析工具定位oom、内存泄漏等问题。</p>
+<h3 id="3-1-调优依据"><a href="#3-1-调优依据" class="headerlink" title="3.1 调优依据"></a><strong>3.1 调优依据</strong></h3><p>JVM调优时，吞吐量和停顿时长无法兼顾，吞吐量提高的代价是停顿时间拉长。</p>
+<p>所以，如果应用程序跟用户基本不交互，就优先提升吞吐量。如果应用程序和用户频繁交互，就优先缩短停顿时间。</p>
+<h3 id="3-2-JDK自带的命令行调优工具"><a href="#3-2-JDK自带的命令行调优工具" class="headerlink" title="3.2 JDK自带的命令行调优工具"></a><strong>3.2 JDK自带的命令行调优工具</strong></h3><h4 id="3-2-3-常用命令总结"><a href="#3-2-3-常用命令总结" class="headerlink" title="3.2.3 常用命令总结"></a><strong>3.2.3 常用命令总结</strong></h4><p>**jps：**查看正在运行的 Java 进程。jps -v查看进程启动时的JVM参数；</p>
+<p>**jstat：**查看指定进程的 JVM 统计信息。jstat -gc查看堆各分区大小、YGC,FGC次数和时长。如果服务器没有 GUI 图形界面，只提供了纯文本控制台环境，它是运行期定位虚拟机性能问题的首选工具。</p>
+<p>**jinfo：**实时查看和修改指定进程的 JVM 配置参数。jinfo -flag查看和修改具体参数。</p>
+<p>**jstack：**打印指定进程此刻的线程快照。定位线程长时间停顿的原因，例如死锁、等待资源、阻塞。如果有死锁会打印线程的互相占用资源情况。</p>
+<h4 id="3-2-4-jps：查看正在运行的-Java-进程"><a href="#3-2-4-jps：查看正在运行的-Java-进程" class="headerlink" title="3.2.4 jps：查看正在运行的 Java 进程"></a><strong>3.2.4</strong> jps：查看正在运行的 Java 进程</h4><p>jps(Java Process Status)：显示指定系统内所有的 HotSpot 虚拟机进程（查看虚拟机进程信息），可用于查询正在运行的虚拟机进程。</p>
+<p>说明：对于本地虚拟机进程来说，进程的本地虚拟机 ID 与操作系统的进程 ID 是一致的，是唯一的。</p>
+<p><strong>基本使用语法为：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">jps [options参数] [<span class="hljs-built_in">hostid</span>参数]<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>代码示例</strong></p>
+<p>一个阻塞状态的线程，等待用户输入：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ScannerTest</span> &#123;<br><br><br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><br><br><br>        <span class="hljs-type">Scanner</span> <span class="hljs-variable">scanner</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Scanner</span>(System.in);<br><br><br><br>        <span class="hljs-type">String</span> <span class="hljs-variable">info</span> <span class="hljs-operator">=</span> scanner.next();<br><br><br><br>    &#125;<br><br><br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>运行后，在命令行输入 jps 查看进程：</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/a00ad5e0b68d838fafb4a1a3addd05bf.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+</blockquote>
+<p>我们还可以通过追加参数，来打印额外的信息。 </p>
+<p><strong>options 参数：</strong></p>
+<ul>
+<li>-q：仅仅显示 LVMID（local virtual machine id），即本地虚拟机唯一 id。不显示主类的名称等</li>
+<li>-l：输出应用程序主类的全类名或如果进程执行的是 jar 包，则输出 jar 完整路径</li>
+<li>-m：输出虚拟机进程启动时传递给主类 main() 的参数</li>
+<li>**-v：列出虚拟机进程启动时的 JVM 参数。**比如：<code>-Xms20m -Xmx50m</code> 是启动程序指定的 jvm 参数</li>
+</ul>
+<p>说明：以上参数可以综合使用。</p>
+<blockquote>
+<p><strong>案例：</strong></p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/1a331e13267961bcf43ece08c04f1f55.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/acdf6ebc406dc484c05b449db6261ede.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/d97617b4397e676a3db534b39fb7b0f2.png" srcset="/img/loading.gif" lazyload alt="img"> <img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/648dab640e6355a58903ba6c640c0a84.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/92237f957574df5a06eb743170c1783c.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>补充：<strong>如果某 Java 进程关闭了默认开启的 UsePerfData 参数（即使用参数 -XX:-UsePerfData），那么 jps 命令（以及下面介绍的 jstat）将</strong>无法探知</strong>该 Java 进程。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/4823f3f17a1384046e7b386974ac2899.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p> <img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/6cfd5680ecedd34bb180499ee82a839e.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+</blockquote>
+<p><strong>hostid 参数：</strong></p>
+<p>RMI 注册表中注册的主机名。如果想要远程监控主机上的 java 程序，需要安装 jstatd。</p>
+<p>对于具有更严格的安全实践的网络场所而言，可能使用一个自定义的策略文件来显示对特定的可信主机或网络的访问，尽管这种技术容易受到 IP 地址欺诈攻击。</p>
+<p>如果安全问题无法使用一个定制的策略文件来处理，那么最安全的操作是不运行 jstatd 服务器，而是在本地使用 jstat 和 jps 工具。</p>
+<h4 id="3-2-5-jstat：查看-JVM-统计信息"><a href="#3-2-5-jstat：查看-JVM-统计信息" class="headerlink" title="3.2.5 jstat：查看 JVM 统计信息"></a><strong>3.2.5</strong> jstat：查看 JVM 统计信息</h4><p><strong>概述</strong></p>
+<p>jstat（JVM Statistics Monitoring Tool）：用于监视虚拟机各种运行状态信息的命令行工具。它可以显示本地或者远程虚拟机进程中的<strong>类装载、内存、垃圾收集、JIT 编译等运行数据</strong>。在没有 GUI 图形界面，<strong>只提供了纯文本控制台环境的服务器上</strong>，它将是<strong>运行期定位虚拟机性能问题</strong>的首选工具。常用于检测垃圾回收问题以及内存泄漏问题。</p>
+<p>基本使用语法为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">jstat -&lt;option&gt; [-t] [-h&lt;lines&gt;] &lt;vmid&gt; [&lt;interval&gt; [&lt;count&gt;]]<br><br><br><br><span class="hljs-comment">#[-t]是程序开启到采样的运行时间 interval查询间隔 count查询次数 [-h&lt;lines&gt;]周期性输出，每隔多少行打印一次表头</span><br></code></pre></td></tr></table></figure>
+
+<p>查看命令相关参数：<code>jstat-h</code> 或 <code>jstat-help</code>。</p>
+<p>其中 vmid 是进程 id 号，也就是 jps 之后看到的前面的号码，如下：</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/7b59e70cfe6edb4f22ff79e7fc62dfed.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>option参数：</strong></p>
+<p>选项 option 可以由以下值构成：</p>
+<p><strong>类装载相关的</strong>：</p>
+<ul>
+<li>**-class：**显示 ClassLoader 的相关信息：类的装载、卸载数量、总空间、类装载所消耗的时间等</li>
+</ul>
+<p><strong>垃圾回收相关的</strong>：</p>
+<ul>
+<li>**-gc：显示堆各分区大小、YGC,FGC次数和时长。**包括 Eden 区、两个 Survivor 区、老年代、永久代等的容量、已用空间、GC 时间合计等信息</li>
+<li>-gccapacity：显示内容与 <code>-gc</code> 基本相同，但输出主要关注 Java 堆各个区域使用到的最大、最小空间</li>
+<li>-gcutil：显示内容与 <code>-gc</code> 基本相同，但输出主要关注已使用空间占总空间的百分比</li>
+<li>-gccause：与 <code>-gcutil</code> 功能一样，但是会额外输出导致最后一次或当前正在发生的 GC 产生的原因</li>
+<li>-gcnew：显示新生代 GC 状况</li>
+<li>-gcnewcapacity：显示内容与 <code>-gcnew</code> 基本相同，输出主要关注使用到的最大、最小空间</li>
+<li>-geold：显示老年代 GC 状况</li>
+<li>-gcoldcapacity：显示内容与 <code>-gcold</code> 基本相同，输出主要关注使用到的最大、最小空间</li>
+<li>-gcpermcapacity：显示永久代使用到的最大、最小空间</li>
+</ul>
+<p><strong>JIT 相关的</strong>：</p>
+<ul>
+<li>-compiler：显示 JIT 编译器编译过的方法、耗时等信息</li>
+<li>-printcompilation：输出已经被 JIT 编译的方法</li>
+</ul>
+<blockquote>
+<p><strong>jstat -class</strong></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">jstat -class 86517<br><br><br><br>Loaded  Bytes  Unloaded  Bytes     Time<br><br><br><br> 18051 32345.3        0     0.0     112.14<br></code></pre></td></tr></table></figure>
+
+
+
+<table>
+<thead>
+<tr>
+<th align="left">显示列名</th>
+<th align="left">具体描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Loaded</strong></td>
+<td align="left">装载的类的数量</td>
+</tr>
+<tr>
+<td align="left"><strong>Bytes</strong></td>
+<td align="left">装载的字节数</td>
+</tr>
+<tr>
+<td align="left"><strong>Unloaded</strong></td>
+<td align="left">卸载的类的数量</td>
+</tr>
+<tr>
+<td align="left"><strong>Bytes</strong></td>
+<td align="left">卸载的类数量</td>
+</tr>
+<tr>
+<td align="left"><strong>Time</strong></td>
+<td align="left">装载和卸载的使用时间</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>jstat -compiler</strong></p>
+</blockquote>
+<p>显示 JIT 编译器编译过的方法、耗时等信息。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/fb3800401d8443af2724966f7a00d666.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -printcompilation</strong></p>
+</blockquote>
+<p>输出已经被 JIT 编译的方法。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/67c2ae8d204f99b081c7680573a55049.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -gc</strong></p>
+</blockquote>
+<p>显示与 GC 相关的堆信息。包括 Eden 区、两个 Survivor 区、老年代、永久代等的容量、已用空间、GC 时间合计等信息。</p>
+<p>执行代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">GCTest</span> &#123;<br><br><br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><br><br><br>        ArrayList&lt;<span class="hljs-type">byte</span>[]&gt; list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br><br><br> <br><br><br><br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1000</span>; i++) &#123;<br><br><br><br>            <span class="hljs-type">byte</span>[] arr = <span class="hljs-keyword">new</span> <span class="hljs-title class_">byte</span>[<span class="hljs-number">1024</span> * <span class="hljs-number">100</span>];<span class="hljs-comment">//100KB</span><br><br><br><br>            list.add(arr);<br><br><br><br>            <span class="hljs-keyword">try</span> &#123;<br><br><br><br>                Thread.sleep(<span class="hljs-number">120</span>);<br><br><br><br>            &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br><br><br><br>                e.printStackTrace();<br><br><br><br>            &#125;<br><br><br><br>        &#125;<br><br><br><br>    &#125;<br><br><br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>JVM 参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cobol">-Xms60m -Xmx60m -XX:SurvivorRatio=8<br></code></pre></td></tr></table></figure>
+
+<p>运行后利用命令查询：</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/db1f6a05d38c8a707d083a2f05d64031.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left">表头</th>
+<th align="left">含义（字节）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">S0C</td>
+<td align="left">幸存者 0 区的大小</td>
+</tr>
+<tr>
+<td align="left">S1C</td>
+<td align="left">幸存者 1 区的大小</td>
+</tr>
+<tr>
+<td align="left">S0U</td>
+<td align="left">幸存者 0 区已使用的大小</td>
+</tr>
+<tr>
+<td align="left">S1U</td>
+<td align="left">幸存者 1 区已使用的大小</td>
+</tr>
+<tr>
+<td align="left">EC</td>
+<td align="left">Eden 区的大小</td>
+</tr>
+<tr>
+<td align="left">EU</td>
+<td align="left">Eden 区已使用的大小</td>
+</tr>
+<tr>
+<td align="left">OC</td>
+<td align="left">老年代的大小</td>
+</tr>
+<tr>
+<td align="left">OU</td>
+<td align="left">老年代已使用的大小</td>
+</tr>
+<tr>
+<td align="left">MC</td>
+<td align="left">元空间的大小</td>
+</tr>
+<tr>
+<td align="left">MU</td>
+<td align="left">元空间已使用的大小</td>
+</tr>
+<tr>
+<td align="left">CCSC</td>
+<td align="left">压缩类空间的大小</td>
+</tr>
+<tr>
+<td align="left">CCSU</td>
+<td align="left">压缩类空间已使用的大小</td>
+</tr>
+<tr>
+<td align="left">YGC</td>
+<td align="left">从应用程序启动到采样时 Young GC 的次数</td>
+</tr>
+<tr>
+<td align="left">YGCT</td>
+<td align="left">从应用程序启动到采样时 Young GC 消耗时间（秒）</td>
+</tr>
+<tr>
+<td align="left">FGC</td>
+<td align="left">从应用程序启动到采样时 Full GC 的次数</td>
+</tr>
+<tr>
+<td align="left">FGCT</td>
+<td align="left">从应用程序启动到采样时的 Full GC 的消耗时间（秒）</td>
+</tr>
+<tr>
+<td align="left">GCT</td>
+<td align="left">从应用程序启动到采样时 GC 的总时间</td>
+</tr>
+</tbody></table>
+<p>后面的参数代表 1000 毫秒打印一次，一个打印 10 次。</p>
+<blockquote>
+<p><strong>jstat -gccapacity</strong></p>
+</blockquote>
+<p>显示内容与 <code>-gc</code> 基本相同，但输出主要关注 Java 堆各个区域使用到的最大、最小空间。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/1ee9943e79b20cd1c41cbbda527240a8.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -gcutil</strong></p>
+</blockquote>
+<p>显示内容与 <code>-gc</code> 基本相同，但输出主要关注已使用空间占总空间的百分比。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/08c072b1d7beac068405ff8faa15e426.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left">表头</th>
+<th align="left">含义（字节）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">SO</td>
+<td align="left">Survivor 0 区空间百分比</td>
+</tr>
+<tr>
+<td align="left">S1</td>
+<td align="left">Survivor 1 区空间百分比</td>
+</tr>
+<tr>
+<td align="left">E</td>
+<td align="left">Eden 区空间百分比</td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">Old 区空间百分比</td>
+</tr>
+<tr>
+<td align="left">N</td>
+<td align="left">方法区空间百分比</td>
+</tr>
+<tr>
+<td align="left">CCS</td>
+<td align="left">压缩空间百分比</td>
+</tr>
+<tr>
+<td align="left">YGC</td>
+<td align="left">从应用程序启动到采样时 Young GC 的次数</td>
+</tr>
+<tr>
+<td align="left">YGCT</td>
+<td align="left">从应用程序启动到采样时 Young GC 消耗时间（秒）</td>
+</tr>
+<tr>
+<td align="left">FGC</td>
+<td align="left">从应用程序启动到采样时 Full GC 的次数</td>
+</tr>
+<tr>
+<td align="left">FGCT</td>
+<td align="left">从应用程序启动到采样时的 Full GC 的消耗时间（秒）</td>
+</tr>
+<tr>
+<td align="left">GCT</td>
+<td align="left">从应用程序启动到采样时 GC 的总时间</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>jstat -gccause</strong></p>
+</blockquote>
+<p>与 <code>-gcutil</code> 功能一样，但是会额外输出导致最后一次或当前正在发生的 GC 产生的原因。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/c0879d64377c6375ab50715041ce1a1f.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -gcnew</strong></p>
+</blockquote>
+<p>显示新生代 GC 状况。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/ac3421c88caa34630f5bc318f60edca4.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -gcnewcapacity</strong></p>
+</blockquote>
+<p>显示内容与 <code>-gcnew</code> 基本相同，输出主要关注使用到的最大、最小空间。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/aa435a9812eb1b68feddf440b05f7435.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -gcold</strong></p>
+</blockquote>
+<p>显示老年代 GC 状况。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/a9a2ddcc823b04f50154172de917c061.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -gcoldcapacity</strong></p>
+</blockquote>
+<p>显示内容与 <code>-gcold</code> 基本相同，输出主要关注使用到的最大、最小空间。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/cfbc714aa09c38b2a582cd1df6a5a727.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>其他参数：</strong></p>
+<p>下面的参数都是配合 option 参数后面使用。</p>
+<p>基本使用语法为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">jstat -&lt;option&gt; [-t] [-h&lt;lines&gt;] &lt;vmid&gt; [&lt;interval&gt; [&lt;count&gt;]]<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>interval 参数</strong>：用于指定输出统计数据的周期，单位为毫秒。即：查询间隔</p>
+</li>
+<li><p><strong>count 参数</strong>：用于指定查询的总次数</p>
+</li>
+<li><p><strong>-t 参数</strong>：可以在输出信息前加上一个 Timestamp 列，显示程序的运行时间。单位：秒</p>
+<p>我们可以比较 Java 进程的启动时间以及总 GC 时间（GCT 列），或者两次测量的间隔时间以及总 GC 时间的增量，来得出 GC 时间占运行时间的比例。</p>
+<p>如果该比例超过 20%，则说明目前堆的压力较大；如果该比例超过 90%，则说明堆里几乎没有可用空间，随时都可能抛出 OOM 异常。</p>
+</li>
+<li><p><strong>-h 参数</strong>：可以在周期性数据输出时，输出多少行数据后输出一个表头信息</p>
+</li>
+</ul>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/c619b34c09cfb2dc0a9ff8892321bcee.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -t</strong></p>
+</blockquote>
+<p>可以在输出信息前加上一个 Timestamp 列，显示程序的运行时间。单位：秒。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/a661005eb0525b1e81da9f2bd2f405ab.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p><strong>jstat -t -h</strong></p>
+</blockquote>
+<p>可以在周期性数据输出时，输出多少行数据后输出一个表头信息。</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/933dfa8d8582345870d02755c1af307f.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>【OOM案例】jstat判断内存溢出（OOM）：比较GC时长占运行时长的比例</strong></p>
+<p>我们可以比较 Java 进程的启动时长以及总 GC 时长 (GCT 列)，或者两次测量的间隔时长以及总 GC 时长的增量，来得出 <strong>GC 时长占运行时长的比例</strong>。</p>
+<p>如果该比例超过 <strong>20%</strong>，则说明目前堆的压力较大;</p>
+<p>如果该比例超过 <strong>98%</strong>，则说明这段时期内几乎一直在GC，堆里几乎没有可用空间，随时都可能抛出 <strong>OOM 异常</strong>。</p>
+<blockquote>
+<p>**示例：**统计两次测量的时间间隔内，GC 时长占运行时长的比例： </p>
+<p>使用jstat统计GC信息，并显示进程启动时间、统计间隔1000ms、统计20次</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/bb2fa7cc6135a014001c0caba40398cb.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+</blockquote>
+<p><strong>【内存泄漏案例】比较老年代内存量上涨速度</strong></p>
+<p>每隔一段较长的时间采样多组 OU（老年代内存量） 的最小值，如果这些最小值在上涨，说明无法回收对象在不断增加，可能是内存泄漏导致的。</p>
+<ul>
+<li>在长时间运行的 Java 程序中，我们可以运行 jstat 命令连续获取多行性能数据，并取这几行数据中 OU 列（Old Used，已占用的老年代内存）的最小值</li>
+<li>然后，我们每隔一段较长的时间重复一次上述操作，来<strong>获得多组 OU 最小值</strong>。如果这些值呈上涨趋势，则说明该 Java 程序的<strong>老年代内存已使用量</strong>在不断上涨，这意味着无法回收的对象在不断增加，因此很有<strong>可能</strong>存在内存泄漏（不再使用的对象仍然被引用，导致GC无法回收）。</li>
+</ul>
+<h4 id="3-2-6-jstack：打印指定进程此刻的线程快照"><a href="#3-2-6-jstack：打印指定进程此刻的线程快照" class="headerlink" title="3.2.6 jstack：打印指定进程此刻的线程快照"></a><strong>3.2.6</strong> jstack：打印指定进程此刻的线程快照</h4><blockquote>
+<p>官方帮助文档：<code>https://docs.oracle.com/en/java/javase/11/tools/jstack.html</code></p>
+</blockquote>
+<p>**jstack（JVM Stack Trace）：**用于生成虚拟机指定进程当前时刻的线程快照（虚拟机堆栈跟踪）。</p>
+<p>**线程快照：**该进程内每条线程正在执行的方法堆栈的集合。</p>
+<p>生成线程快照的作用：可用于定位线程出现长时间停顿的原因，如线程间死锁、死循环、请求外部资源导致的长时间等待等问题。这些都是导致线程长时间停顿的常见原因。当线程出现停顿时，就可以用 jstack 显示各个线程调用的堆栈情况。</p>
+<p>在 thread dump 中，要留意下面几种状态</p>
+<ul>
+<li>死锁，Deadlock（重点关注）</li>
+<li>等待资源，Waiting on condition（重点关注）</li>
+<li>等待获取监视器，Waiting on monitor entry（重点关注）</li>
+<li>阻塞，Blocked（重点关注）</li>
+<li>执行中，Runnable</li>
+<li>暂停，Suspended</li>
+<li>对象等待中，<code>Object.wait()</code> 或 <code>TIMED＿WAITING</code></li>
+<li>停止，Parked</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">option 参数</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">-F</td>
+<td align="left">当正常输出的请求不被响应时，强制输出线程堆栈</td>
+</tr>
+<tr>
+<td align="left">-l</td>
+<td align="left">除堆栈外，显示关于锁的附加信息</td>
+</tr>
+<tr>
+<td align="left">-m</td>
+<td align="left">如果调用本地方法的话，可以显示 C&#x2F;C++ 的堆栈</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>代码示例（死锁）</p>
+</blockquote>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/e65359252ac74f1c3b463c965457e954.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/4e73da98c84797105059c4f0c0b85337.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>运行后，在命令行使用该命令：</p>
+<p>输出的代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br></pre></td><td class="code"><pre><code class="hljs bash">2022-01-31 21:51:08<br><br><br><br>Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.231-b11 mixed mode):<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;DestroyJavaVM&quot;</span> <span class="hljs-comment">#15 prio=5 os_prio=0 tid=0x0000000002b12800 nid=0x5b50 waiting on condition [0x0000000000000000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;Thread-1&quot;</span> <span class="hljs-comment">#13 prio=5 os_prio=0 tid=0x000000001e041800 nid=0x9bc waiting for monitor entry [0x000000001fd1f000]</span><br><br><br><br>   java.lang.Thread.State: BLOCKED (on object monitor)<br><br><br><br>        at com.youngkbt.jstack.ThreadDeadLock<span class="hljs-variable">$2</span>.run(ThreadDeadLock.java:63)<br><br><br><br>        - waiting to lock &lt;0x000000076ba1e2f0&gt; (a java.lang.StringBuilder)<br><br><br><br>        - locked &lt;0x000000076ba1e338&gt; (a java.lang.StringBuilder)<br><br><br><br>        at java.lang.Thread.run(Thread.java:748)<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;Thread-0&quot;</span> <span class="hljs-comment">#12 prio=5 os_prio=0 tid=0x000000001e03b800 nid=0x52f8 waiting for monitor entry [0x000000001fc1f000]</span><br><br><br><br>   java.lang.Thread.State: BLOCKED (on object monitor)<br><br><br><br>        at com.youngkbt.jstack.ThreadDeadLock<span class="hljs-variable">$1</span>.run(ThreadDeadLock.java:35)<br><br><br><br>        - waiting to lock &lt;0x000000076ba1e338&gt; (a java.lang.StringBuilder)<br><br><br><br>        - locked &lt;0x000000076ba1e2f0&gt; (a java.lang.StringBuilder)<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;Service Thread&quot;</span> <span class="hljs-comment">#11 daemon prio=9 os_prio=0 tid=0x000000001df8b000 nid=0x3408 runnable [0x0000000000000000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;C1 CompilerThread3&quot;</span> <span class="hljs-comment">#10 daemon prio=9 os_prio=2 tid=0x000000001df47000 nid=0x533c waiting on condition [0x0000000000000000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;C2 CompilerThread2&quot;</span> <span class="hljs-comment">#9 daemon prio=9 os_prio=2 tid=0x000000001df44800 nid=0x4ef8 waiting on condition [0x0000000000000000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;C2 CompilerThread1&quot;</span> <span class="hljs-comment">#8 daemon prio=9 os_prio=2 tid=0x000000001df42800 nid=0x22b8 waiting on condition [0x0000000000000000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;C2 CompilerThread0&quot;</span> <span class="hljs-comment">#7 daemon prio=9 os_prio=2 tid=0x000000001df40000 nid=0x3494 waiting on condition [0x0000000000000000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;Monitor Ctrl-Break&quot;</span> <span class="hljs-comment">#6 daemon prio=5 os_prio=0 tid=0x000000001df35800 nid=0x2da8 runnable [0x000000001f4fe000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br>        at java.net.SocketInputStream.socketRead0(Native Method)<br><br><br><br>        at java.net.SocketInputStream.socketRead(SocketInputStream.java:116)<br><br><br><br>        at java.net.SocketInputStream.<span class="hljs-built_in">read</span>(SocketInputStream.java:171)<br><br><br><br>        at java.net.SocketInputStream.<span class="hljs-built_in">read</span>(SocketInputStream.java:141)<br><br><br><br>        at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:284)<br><br><br><br>        at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:326)<br><br><br><br>        at sun.nio.cs.StreamDecoder.<span class="hljs-built_in">read</span>(StreamDecoder.java:178)<br><br><br><br>        - locked &lt;0x000000076b904d88&gt; (a java.io.InputStreamReader)<br><br><br><br>        at java.io.InputStreamReader.<span class="hljs-built_in">read</span>(InputStreamReader.java:184)<br><br><br><br>        at java.io.BufferedReader.fill(BufferedReader.java:161)<br><br><br><br>        at java.io.BufferedReader.readLine(BufferedReader.java:324)<br><br><br><br>        - locked &lt;0x000000076b904d88&gt; (a java.io.InputStreamReader)<br><br><br><br>        at java.io.BufferedReader.readLine(BufferedReader.java:389)<br><br><br><br>        at com.intellij.rt.execution.application.AppMainV2<span class="hljs-variable">$1</span>.run(AppMainV2.java:47)<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;Attach Listener&quot;</span> <span class="hljs-comment">#5 daemon prio=5 os_prio=2 tid=0x000000001de9e000 nid=0xac waiting on condition [0x0000000000000000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;Signal Dispatcher&quot;</span> <span class="hljs-comment">#4 daemon prio=9 os_prio=2 tid=0x000000001def2000 nid=0x2908 runnable [0x0000000000000000]</span><br><br><br><br>   java.lang.Thread.State: RUNNABLE<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;Finalizer&quot;</span> <span class="hljs-comment">#3 daemon prio=8 os_prio=1 tid=0x000000001c7c3800 nid=0x1610 in Object.wait() [0x000000001f1df000]</span><br><br><br><br>   java.lang.Thread.State: WAITING (on object monitor)<br><br><br><br>        at java.lang.Object.<span class="hljs-built_in">wait</span>(Native Method)<br><br><br><br>        - waiting on &lt;0x000000076b788ed8&gt; (a java.lang.ref.ReferenceQueue<span class="hljs-variable">$Lock</span>)<br><br><br><br>        at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:144)<br><br><br><br>        - locked &lt;0x000000076b788ed8&gt; (a java.lang.ref.ReferenceQueue<span class="hljs-variable">$Lock</span>)<br><br><br><br>        at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:165)<br><br><br><br>        at java.lang.ref.Finalizer<span class="hljs-variable">$FinalizerThread</span>.run(Finalizer.java:216)<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;Reference Handler&quot;</span> <span class="hljs-comment">#2 daemon prio=10 os_prio=2 tid=0x000000001de83000 nid=0x31e4 in Object.wait() [0x000000001f0de000]</span><br><br><br><br>   java.lang.Thread.State: WAITING (on object monitor)<br><br><br><br>        at java.lang.Object.<span class="hljs-built_in">wait</span>(Native Method)<br><br><br><br>        - waiting on &lt;0x000000076b786c00&gt; (a java.lang.ref.Reference<span class="hljs-variable">$Lock</span>)<br><br><br><br>        at java.lang.Object.<span class="hljs-built_in">wait</span>(Object.java:502)<br><br><br><br>        at java.lang.ref.Reference.tryHandlePending(Reference.java:191)<br><br><br><br>        - locked &lt;0x000000076b786c00&gt; (a java.lang.ref.Reference<span class="hljs-variable">$Lock</span>)<br><br><br><br>        at java.lang.ref.Reference<span class="hljs-variable">$ReferenceHandler</span>.run(Reference.java:153)<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;VM Thread&quot;</span> os_prio=2 tid=0x000000001de62800 nid=0x575c runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#0 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b28800 nid=0x1768 runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#1 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b2a000 nid=0x97c runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#2 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b2c000 nid=0x4364 runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#3 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b2d800 nid=0x4608 runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#4 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b2f800 nid=0x4f38 runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#5 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b32000 nid=0xb80 runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#6 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b35000 nid=0xce4 runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#7 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b36000 nid=0x5510 runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#8 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b37800 nid=0x193c runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;GC task thread#9 (ParallelGC)&quot;</span> os_prio=0 tid=0x0000000002b38800 nid=0x1010 runnable<br><br><br><br> <br><br><br><br><span class="hljs-string">&quot;VM Periodic Task Thread&quot;</span> os_prio=2 tid=0x000000001e008000 nid=0x1144 waiting on condition<br><br><br><br> <br><br><br><br>JNI global references: 12<br><br><br><br> <br><br><br><br> <br><br><br><br>Found one Java-level deadlock:<br><br><br><br>=============================<br><br><br><br><span class="hljs-string">&quot;Thread-1&quot;</span>:<br><br><br><br>  waiting to lock monitor 0x000000001e044d58 (object 0x000000076ba1e2f0, a java.lang.StringBuilder),<br><br><br><br>  <span class="hljs-built_in">which</span> is held by <span class="hljs-string">&quot;Thread-0&quot;</span><br><br><br><br><span class="hljs-string">&quot;Thread-0&quot;</span>:<br><br><br><br>  waiting to lock monitor 0x000000001c7c2dc8 (object 0x000000076ba1e338, a java.lang.StringBuilder),<br><br><br><br>  <span class="hljs-built_in">which</span> is held by <span class="hljs-string">&quot;Thread-1&quot;</span><br><br><br><br> <br><br><br><br>Java stack information <span class="hljs-keyword">for</span> the threads listed above:<br><br><br><br>===================================================<br><br><br><br><span class="hljs-string">&quot;Thread-1&quot;</span>:<br><br><br><br>        at com.youngkbt.jstack.ThreadDeadLock<span class="hljs-variable">$2</span>.run(ThreadDeadLock.java:63)<br><br><br><br>        - waiting to lock &lt;0x000000076ba1e2f0&gt; (a java.lang.StringBuilder)<br><br><br><br>        - locked &lt;0x000000076ba1e338&gt; (a java.lang.StringBuilder)<br><br><br><br>        at java.lang.Thread.run(Thread.java:748)<br><br><br><br><span class="hljs-string">&quot;Thread-0&quot;</span>:<br><br><br><br>        at com.youngkbt.jstack.ThreadDeadLock<span class="hljs-variable">$1</span>.run(ThreadDeadLock.java:35)<br><br><br><br>        - waiting to lock &lt;0x000000076ba1e338&gt; (a java.lang.StringBuilder)<br><br><br><br>        - locked &lt;0x000000076ba1e2f0&gt; (a java.lang.StringBuilder)<br><br><br><br> <br><br><br><br>Found 1 deadlock.<br></code></pre></td></tr></table></figure>
+
+
+
+<p>部分图：（可以看出 BLOCKED 进入死锁阻塞）</p>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/a3a84365b8a1e7f22a8795bd2a8a0dab.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p>其他代码示例：</p>
+</blockquote>
+<p>因为内容结果太长，所以只给代码，在命令行的输入可以自行练习查看（也可以使用 option 参数查看额外内容）。</p>
+<p>线程睡眠代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TreadSleepTest</span> &#123;<br><br><br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><br><br><br>        System.out.println(<span class="hljs-string">&quot;hello - 1&quot;</span>);<br><br><br><br>        <span class="hljs-keyword">try</span> &#123;<br><br><br><br>            Thread.sleep(<span class="hljs-number">1000</span> * <span class="hljs-number">60</span> * <span class="hljs-number">10</span>);<br><br><br><br>        &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br><br><br><br>            e.printStackTrace();<br><br><br><br>        &#125;<br><br><br><br> <br><br><br><br>        System.out.println(<span class="hljs-string">&quot;hello - 2&quot;</span>);<br><br><br><br>    &#125;<br><br><br><br>&#125;<br><br><br><br> <br></code></pre></td></tr></table></figure>
+
+<p>线程同步代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ThreadSyncTest</span> &#123;<br><br><br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><br><br><br>        <span class="hljs-type">Number</span> <span class="hljs-variable">number</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Number</span>();<br><br><br><br>        <span class="hljs-type">Thread</span> <span class="hljs-variable">t1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(number);<br><br><br><br>        <span class="hljs-type">Thread</span> <span class="hljs-variable">t2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(number);<br><br><br><br> <br><br><br><br>        t1.setName(<span class="hljs-string">&quot;线程1&quot;</span>);<br><br><br><br>        t2.setName(<span class="hljs-string">&quot;线程2&quot;</span>);<br><br><br><br> <br><br><br><br>        t1.start();<br><br><br><br>        t2.start();<br><br><br><br>    &#125;<br><br><br><br>&#125;<br><br><br><br> <br><br><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Number</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Runnable</span> &#123;<br><br><br><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">number</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;<br><br><br><br> <br><br><br><br>    <span class="hljs-meta">@Override</span><br><br><br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span> &#123;<br><br><br><br>        <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br><br><br><br>            <span class="hljs-keyword">synchronized</span> (<span class="hljs-built_in">this</span>) &#123;<br><br><br><br> <br><br><br><br>                <span class="hljs-keyword">if</span> (number &lt;= <span class="hljs-number">100</span>) &#123;<br><br><br><br> <br><br><br><br>                    <span class="hljs-keyword">try</span> &#123;<br><br><br><br>                        Thread.sleep(<span class="hljs-number">500</span>);<br><br><br><br>                    &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br><br><br><br>                        e.printStackTrace();<br><br><br><br>                    &#125;<br><br><br><br> <br><br><br><br>                    System.out.println(Thread.currentThread().getName() + <span class="hljs-string">&quot;:&quot;</span> + number);<br><br><br><br>                    number++;<br><br><br><br> <br><br><br><br>                &#125; <span class="hljs-keyword">else</span> &#123;<br><br><br><br>                    <span class="hljs-keyword">break</span>;<br><br><br><br>                &#125;<br><br><br><br>            &#125;<br><br><br><br>        &#125;<br><br><br><br>    &#125;<br><br><br><br> <br><br><br><br>&#125;<br><br><br><br> <br></code></pre></td></tr></table></figure>
+
+<p>在控制台输出结果的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AllStackTrace</span> &#123;<br><br><br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><br><br><br>        Map&lt;Thread, StackTraceElement[]&gt; all = Thread.getAllStackTraces();<br><br><br><br>        Set&lt;Map.Entry&lt;Thread, StackTraceElement[]&gt;&gt; entries = all.entrySet();<br><br><br><br>        <span class="hljs-keyword">for</span>(Map.Entry&lt;Thread, StackTraceElement[]&gt; en : entries)&#123;<br><br><br><br>            <span class="hljs-type">Thread</span> <span class="hljs-variable">t</span> <span class="hljs-operator">=</span> en.getKey();<br><br><br><br>            StackTraceElement[] v = en.getValue();<br><br><br><br>            System.out.println(<span class="hljs-string">&quot;【Thread name is :&quot;</span> + t.getName() + <span class="hljs-string">&quot;】&quot;</span>);<br><br><br><br>            <span class="hljs-keyword">for</span>(StackTraceElement s : v)&#123;<br><br><br><br>                System.out.println(<span class="hljs-string">&quot;\t&quot;</span> + s.toString());<br><br><br><br>            &#125;<br><br><br><br>        &#125;<br><br><br><br>    &#125;<br><br><br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="3-3-JDK自带的可视化监控工具"><a href="#3-3-JDK自带的可视化监控工具" class="headerlink" title="3.3 JDK自带的可视化监控工具"></a>3.3 JDK自带的可视化监控工具</h3><ul>
+<li>jconsole</li>
+<li>Visual VM：Visual VM可以监视应用程序的 CPU、GC、堆、方法区、线程快照，查看JVM进程、JVM 参数、系统属性。</li>
+</ul>
+<h3 id="3-4-MAT分析堆转储文件"><a href="#3-4-MAT分析堆转储文件" class="headerlink" title="3.4 MAT分析堆转储文件"></a><strong>3.4 MAT分析堆转储文件</strong></h3><h4 id="3-4-1-简介"><a href="#3-4-1-简介" class="headerlink" title="3.4.1 简介"></a><strong>3.4.1 简介</strong></h4><p>**MAT简介：**MAT可以解析Heap Dump（堆转储）文件dump.hprof，查看GC Roots、引用链、对象信息、类信息、线程信息。可以快速生成内存泄漏报表。</p>
+<p>MAT（Memory Analyzer Tool）工具是一款功能强大的 Java 堆内存分析器。可以用于查找内存泄漏以及查看内存消耗情况。</p>
+<p>MAT 可以分析 heap dump 文件。在进行内存分析时，只要获得了反映当前设备内存映像的 hprof 文件，通过 MAT 打开就可以直观地看到当前的内存信息。一般说来，这些内存信息包含：</p>
+<ul>
+<li>所有的对象信息，包括对象实例、成员变量、存储于栈中的基本类型值和存储于堆中的其他对象的引用值</li>
+<li>所有的类信息，包括 classloader、类名称、父类、静态变量等</li>
+<li>GCRoot 到所有的这些对象的引用路径</li>
+<li>线程信息，包括线程的调用栈及此线程的线程局部变量（TLS）</li>
+</ul>
+<h4 id="3-4-2-生成dump文件方式"><a href="#3-4-2-生成dump文件方式" class="headerlink" title="3.4.2 生成dump文件方式"></a><strong>3.4.2 生成dump文件方式</strong></h4><p><strong>方法一：jmap</strong></p>
+<p>jmap（JVM Memory Map）：作用一方面是获取 dump 文件（堆转储快照文件，二进制文件），它还可以获取目标 Java 进程的内存相关信息，包括 Java 堆各区域的使用情况、堆中对象的统计信息、类加载信息等。开发人员可以在控制台中输入命令 <code>jmap -help</code> 查阅 jmap 工具的具体使用方式和一些标准选项配置。</p>
+<p><strong>基本语法</strong></p>
+<p>基本使用语法为：</p>
+<ul>
+<li><code>jmap [option] &lt;pid&gt;</code></li>
+<li><code>jmap [option] &lt;executable &lt;core&gt;</code></li>
+<li><code>jmap [option] [server_id@] &lt;remote server IP or hostname&gt;</code></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">选项</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">-dump</td>
+<td align="left">生成 dump 文件（Java 堆转储快照），-dump:live 只保存堆中的存活对象</td>
+</tr>
+<tr>
+<td align="left">-heap</td>
+<td align="left">输出整个堆空间的详细信息，包括 GC 的使用、堆配置信息，以及内存的使用信息等</td>
+</tr>
+<tr>
+<td align="left">-histo</td>
+<td align="left">输出堆空间中对象的统计信息，包括类、实例数量和合计容量，-histo:live 只统计堆中的存活对象</td>
+</tr>
+<tr>
+<td align="left">-J <flag></flag></td>
+<td align="left">传递参数给 jmap 启动的 jvm</td>
+</tr>
+<tr>
+<td align="left">-finalizerinfo</td>
+<td align="left">显示在 F-Queue 中等待 Finalizer 线程执行 finalize 方法的对象，仅 linux&#x2F;solaris 平台有效</td>
+</tr>
+<tr>
+<td align="left">-permstat</td>
+<td align="left">以 ClassLoader 为统计口径输出永久代的内存状态信息，仅 linux&#x2F;solaris 平台有效</td>
+</tr>
+<tr>
+<td align="left">-F</td>
+<td align="left">当虚拟机进程对-dump 选项没有任何响应时，强制执行生成 dump 文件，仅 linux&#x2F;solaris 平台有效</td>
+</tr>
+<tr>
+<td align="left">-h | -help</td>
+<td align="left">jmap 工具使用的帮助命令</td>
+</tr>
+<tr>
+<td align="left">-j <flag></flag></td>
+<td align="left">传递参数给 jmap 启动的 JVM</td>
+</tr>
+</tbody></table>
+<p>说明：这些参数和 linux 下输入显示的命令多少会有不同，包括也受 JDK 版本的影响。</p>
+<p>JVM参数：OOM后生成、FGC前生成</p>
+<p><strong>方法二：Visual VM</strong></p>
+<p>使用 Visual VM 可以导出堆 dump 文件。</p>
+<p><strong>1.首先启动程序(需确保程序一直在运行中)</strong><br><strong>2.打开JvisualVM工具</strong><br><strong>3.打开对应的程序进程</strong><br><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/809f408ddfc41ff1149085b31c638fbf.png" srcset="/img/loading.gif" lazyload alt="请添加图片描述"><br><strong>4.点击线程-&gt;线程dump</strong><br><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/f040b8f39adf52c43b54f35ca936f8f3.png" srcset="/img/loading.gif" lazyload alt="请添加图片描述"></p>
+<p><strong>5.右键快照-&gt;另存为</strong><br><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/0e79a8ac8f44e560dc7e8dfcc2cf1c46.png" srcset="/img/loading.gif" lazyload alt="请添加图片描述"><br><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/32f57c348750871d9e5ea8dddcd3c80a.png" srcset="/img/loading.gif" lazyload alt="请添加图片描述"></p>
+<p><strong>方法三：MAT直接从Java进程导出dump文件</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 开启在出现 OOM 错误时生成堆转储文件</span><br><br><br><br>-Xmx1024m<br><br><br><br>-XX:+HeapDumpOnOutOfMemoryError<br><br><br><br><span class="hljs-comment">// 将生成的堆转储文件保存到 /tmp 目录下，并以进程 ID 和时间戳作为文件名</span><br><br><br><br>-XX:HeapDumpPath=/tmp/java_%p_%t.hprof<br><br><br><br> <br><br><br><br><span class="hljs-comment">// 在进行 Full GC 前生成堆转储文件</span><br><br><br><br><span class="hljs-comment">// 注：如果没有开启自动 GC，则此参数无效。JDK 9 之后该参数已被删除。</span><br><br><br><br>-XX:+HeapDumpBeforeFullGC    <br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="四、JVM性能调优"><a href="#四、JVM性能调优" class="headerlink" title="四、JVM性能调优"></a><strong>四、JVM性能调优</strong></h2><h3 id="4-1-调优JVM参数"><a href="#4-1-调优JVM参数" class="headerlink" title="4.1 调优JVM参数"></a>4.1 <strong>调优JVM参数</strong></h3><p>调优JVM参数主要关注停顿时间和吞吐量，两者不可兼得，提高吞吐量会拉长停顿时间。</p>
+<h4 id="4-1-0-JVM常用调优参数查看和汇总"><a href="#4-1-0-JVM常用调优参数查看和汇总" class="headerlink" title="4.1.0 JVM常用调优参数查看和汇总"></a>4.1.0 JVM常用调优参数查看和汇总</h4><p><strong>查看当前JVM参数配置：</strong></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">java -<span class="hljs-variable constant_">XX</span><span class="hljs-symbol">:+PrintFlagsFinal</span> -version<br></code></pre></td></tr></table></figure>
+
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/1501dd36f64843f46f78d3f03351bb16.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p> <strong>常用参数：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//调整内存大小</span><br><br><br><br>-XX:MetaspaceSize=128m（元空间默认大小）<br><br><br><br>-XX:MaxMetaspaceSize=128m（元空间最大大小）<br><br><br><br>-Xms1024m（堆最大大小）<br><br><br><br>-Xmx1024m（堆默认大小）<br><br><br><br>-Xmn256m（新生代大小）<br><br><br><br>-Xss256k（栈最大深度大小）<br><br><br><br> <br><br><br><br><span class="hljs-comment">//调整内存比例</span><br><br><br><br> <span class="hljs-comment">//伊甸园:幸存区</span><br><br><br><br>-XX:SurvivorRatio=<span class="hljs-number">8</span>（伊甸园:幸存区=<span class="hljs-number">8</span>:<span class="hljs-number">2</span>）<br><br><br><br> <span class="hljs-comment">//新生代和老年代的占比</span><br><br><br><br> -XX:NewRatio=<span class="hljs-number">4</span>  <span class="hljs-comment">//表示新生代:老年代 = 1:4 即老年代占整个堆的4/5；默认值=2</span><br><br><br><br> <br><br><br><br><span class="hljs-comment">//修改垃圾回收器</span><br><br><br><br><span class="hljs-comment">//设置Serial垃圾收集器（新生代）</span><br><br><br><br><span class="hljs-comment">//-XX:+UseSerialGC</span><br><br><br><br> <span class="hljs-comment">//设置PS+PO,新生代使用功能Parallel Scavenge 老年代将会使用Parallel Old收集器</span><br><br><br><br><span class="hljs-comment">//-XX:+UseParallelOldGC</span><br><br><br><br> <span class="hljs-comment">//CMS垃圾收集器（老年代）</span><br><br><br><br><span class="hljs-comment">//-XX:+UseConcMarkSweepGC</span><br><br><br><br> <span class="hljs-comment">//设置G1垃圾收集器</span><br><br><br><br>-XX:+UseG1GC<br><br><br><br> <br><br><br><br><span class="hljs-comment">//GC停顿时间，垃圾收集器会尝试用各种手段达到这个时间</span><br><br><br><br> -XX:MaxGCPauseMillis<br><br><br><br> <br><br><br><br> <span class="hljs-comment">//进入老年代最小的GC年龄,年轻代对象转换为老年代对象最小年龄值，JDK8默认值15，JDK9默认值7</span><br><br><br><br> -XX:InitialTenuringThreshold=<span class="hljs-number">7</span><br><br><br><br> <span class="hljs-comment">//新生代可容纳的最大对象,大于则直接会分配到老年代，0代表没有限制。</span><br><br><br><br>  -XX:PretenureSizeThreshold=<span class="hljs-number">1000000</span><br><br><br><br> <br><br><br><br> <span class="hljs-comment">//使用多少比例的老年代后开始CMS收集，默认是68%，如果频繁发生SerialOld卡顿，应该调小</span><br><br><br><br> -XX:CMSInitiatingOccupancyFraction <br><br><br><br> <span class="hljs-comment">//G1混合垃圾回收周期中要包括的旧区域设置占用率阈值。默认占用率为 65%</span><br><br><br><br> -XX:G1MixedGCLiveThresholdPercent=<span class="hljs-number">65</span><br><br><br><br> <br><br><br><br> <span class="hljs-comment">//Heap Dump（堆转储）文件</span><br><br><br><br> <span class="hljs-comment">//当发生OutOfMemoryError错误时，自动生成堆转储文件。</span><br><br><br><br>-XX:+HeapDumpOnOutOfMemoryError <br><br><br><br> <span class="hljs-comment">//错误输出地址</span><br><br><br><br>-XX:HeapDumpPath=/Users/a123/IdeaProjects/java-test/logs/dump.hprof<br><br><br><br> <br><br><br><br> <span class="hljs-comment">//GC日志</span><br><br><br><br>-XX:+PrintGCDetails（打印详细GC日志）<br><br><br><br>-XX:+PrintGCTimeStamps：打印GC时间戳（以基准时间的形式）<br><br><br><br>-XX:+PrintGCDateStamps：打印GC时间戳（以日期格式）<br><br><br><br>-Xlog:gc:（打印gc日志地址）<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-1-1-减少停顿时间：-MaxGCPauseMillis"><a href="#4-1-1-减少停顿时间：-MaxGCPauseMillis" class="headerlink" title="**4.1.1 减少停顿时间：**MaxGCPauseMillis"></a>**4.1.1 减少停顿时间：**MaxGCPauseMillis</h4><p>**STW：**Stop The World，暂停其他所有工作线程直到收集结束。垃圾收集器做垃圾回收中断应用执行的时间。</p>
+<p>可以通过-XX:MaxGCPauseMillis参数进行设置，以毫秒为单位，至少大于1。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//GC停顿时间，垃圾收集器会尝试用各种手段达到这个时间</span><br><br><br><br> -XX:MaxGCPauseMillis=<span class="hljs-number">10</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>G1回收器默认200ms停顿时长。</p>
+</blockquote>
+<h4 id="4-1-2-提高吞吐量：-GCTimeRatio"><a href="#4-1-2-提高吞吐量：-GCTimeRatio" class="headerlink" title="**4.1.2 提高吞吐量：**GCTimeRatio"></a>**4.1.2 提高吞吐量：**GCTimeRatio</h4><p>吞吐量&#x3D;运行时长&#x2F;(运行时长+GC时长)。</p>
+<p>通过-XX:GCTimeRatio&#x3D;n参数可以设置吞吐量，99代表吞吐量为99%， 一般吞吐量不能低于95%。</p>
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">-XX:GCTimeRatio=99<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>吞吐量太高会拉长停顿时间，造成用户体验下降。 </p>
+</blockquote>
+<h4 id="4-1-3-调整堆内存大小"><a href="#4-1-3-调整堆内存大小" class="headerlink" title="4.1.3 调整堆内存大小"></a><strong>4.1.3 调整堆内存大小</strong></h4><p>根据程序运行时老年代存活对象大小（记为x）进行调整，整个堆内存大小设置为X的3~4倍。年轻代占堆内存的3&#x2F;8。</p>
+<ul>
+<li>**-Xms：**初始堆内存大小。**默认：**物理内存小于192MB时，默认为物理内存的1&#x2F;2；物理内存大192MB且小于128GB时，默认为物理内存的1&#x2F;4；物理内存大于等于128GB时，都为32GB。</li>
+<li>**-Xmx：**最大堆内存大小，建议保持和初始堆内存大小一样。因为从初始堆到最大堆的过程会有一定的性能开销，而且现在内存不是稀缺资源。</li>
+<li>**-Xmn：**年轻代大小。JDK官方建议年轻代占整个堆大小空间的3&#x2F;8左右。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//调整内存大小</span><br><br><br><br>-XX:MetaspaceSize=128m（元空间默认大小）<br><br><br><br>-XX:MaxMetaspaceSize=128m（元空间最大大小）<br><br><br><br>-Xms1024m（堆最大大小）<br><br><br><br>-Xmx1024m（堆默认大小）<br><br><br><br>-Xmn256m（新生代大小）<br><br><br><br>-Xss256k（栈最大深度大小）<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-1-4-调整堆内存比例"><a href="#4-1-4-调整堆内存比例" class="headerlink" title="4.1.4 调整堆内存比例"></a><strong>4.1.4 调整堆内存比例</strong></h4><p>调整伊甸园区和幸存区比例、新生代和老年代比例。</p>
+<p>Young GC频繁时，我们可以提高新生代在堆内存中的比例、提高伊甸园区在新生代的比例，令新生代不那么快被填满。</p>
+<p>默认情况，伊甸园区:S0:S1&#x3D;8:1:1，新生代:老年代&#x3D;1:2。</p>
+<p><strong>示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//调整内存比例</span><br><br><br><br> <span class="hljs-comment">//伊甸园:幸存区</span><br><br><br><br>-XX:SurvivorRatio=<span class="hljs-number">8</span>（伊甸园:幸存区=<span class="hljs-number">8</span>:<span class="hljs-number">2</span>）<br><br><br><br> <span class="hljs-comment">//新生代和老年代的占比</span><br><br><br><br> -XX:NewRatio=<span class="hljs-number">4</span>  <span class="hljs-comment">//表示新生代:老年代 = 1:4 即老年代占整个堆的4/5；默认值=2</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-1-5-调整升老年代年龄"><a href="#4-1-5-调整升老年代年龄" class="headerlink" title="4.1.5 调整升老年代年龄"></a><strong>4.1.5 调整升老年代年龄</strong></h4><p>JDK8时Young GC默认把15岁的对象移动到老年代。JDK9默认值改为7。</p>
+<p>当Full GC频繁时，我们提高升老年龄，让年轻代的对象多在年轻代待一会，从而降低Full GC频率。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//进入老年代最小的GC年龄,年轻代对象转换为老年代对象最小年龄值，JDK8默认值15，JDK9默认值7</span><br><br><br><br>-XX:InitialTenuringThreshold=<span class="hljs-number">7</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>扩展：一次完整的GC流程</strong></p>
+<ol>
+<li>首先，任何新对象都分配到 eden 空间。两个幸存者空间开始时都是空的。</li>
+<li>当 eden 空间填满时，将触发一个<strong>Minor GC</strong>(年轻代的垃圾回收，也称为Young GC)，删除所有未引用的对象，<strong>大对象</strong>（需要大量连续内存空间的Java对象，如那种很长的字符串）直接进入老年代。</li>
+<li>所有被引用的对象作为存活对象，将移动到第一个幸存者空间S0，并标记年龄为1，即经历过一次Minor GC。之后每经过一次Minor GC，年龄+1。GC分代年龄存储在对象头的Mark Word里。</li>
+<li>当 eden 空间再次被填满时，会执行第二次Minor GC，将Eden和S0区中所有垃圾对象清除，并将存活对象复制到S1并年龄加1，此时S0变为空。</li>
+<li>如此反复在S0和S1之间切换几次之后，还存活的<strong>年龄等于15的对象</strong>（JDK8默认15，JDK9默认7，-XX:InitialTenuringThreshold&#x3D;7）在下一次Minor GC时将放到老年代中。 </li>
+<li>如果老年代内存不足够存储新对象，则会执行Full GC（清空整个新生代和老年代）。</li>
+<li>当老年代满了时会触发<strong>Full GC或者Major GC</strong>（老年代的垃圾回收，清理整个老年代空间）。具体是Full GC还是Major GC取决于用哪个垃圾回收器，传统垃圾回收器会Full GC，G1（优先使用<strong>Mixed GC</strong>，清空部分新生代和老年代）、ZGC（直接抛出内存溢出错误）等现代回收器会避免Full GC。</li>
+</ol>
+<p><img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/f46c80dc389e4cdb92c8be4f692e92c1.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>扩展：Full GC</strong></p>
+<p>在触发一下条件时，JVM会执行Full GC， 将整个堆（包括整个新生代和老年代）内存清空。</p>
+<p><strong>触发条件：</strong></p>
+<ul>
+<li><strong>调用System.gc()</strong>：调用 System.gc() （用于请求 JVM 执行垃圾回收）时，JVM 会建议执行 Full GC（具体是否执行取决于垃圾回收器实现的System.gc()逻辑，例如Parallel GC、CMS等传统垃圾回收器该方法会Full GC，而G1、ZGC等现代回收器不会Full GC）。</li>
+<li><strong>空间分配担保失败</strong>：当对象从新生代晋升到老年代前，要检查老年代是否有足够空间容纳新对象，这叫做空间分配担保。如果空间不足，则空间分配担保失败，JVM会执行Full GC。</li>
+<li><strong>老年代满了</strong>：当老年代满了时会触发<strong>Full GC或者Major GC</strong>（老年代的垃圾回收，清理整个老年代空间）。具体是Full GC还是Major GC取决于用哪个垃圾回收器，传统垃圾回收器会Full GC，G1（优先使用<strong>Mixed GC</strong>，清空部分新生代和老年代）、ZGC（直接抛出内存溢出错误）等现代回收器会避免Full GC。</li>
+<li><strong>方法区满了</strong>：当方法区（Method Area）空间不足时，会触发Full GC。</li>
+</ul>
+<p><strong>避免Full GC：</strong></p>
+<p>Full GC 的执行时间最长，也是JVM调优的重点。</p>
+<ul>
+<li>调大老年代比例</li>
+<li>增加整个堆内存</li>
+<li>使用G1、ZGC等现代回收器。</li>
+</ul>
+<h4 id="4-1-6-调整大对象阈值"><a href="#4-1-6-调整大对象阈值" class="headerlink" title="4.1.6 调整大对象阈值"></a><strong>4.1.6 调整大对象阈值</strong></h4><p>Young GC时大对象会不顾年龄直接移动到老年代。当Full GC频繁时，我们关闭或提高大对象阈值，让老年代更迟填满。</p>
+<p>默认是0，即大对象不会直接在YGC时移到老年代。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//新生代可容纳的最大对象,大于则直接会分配到老年代，0代表没有限制。</span><br><br><br><br> -XX:PretenureSizeThreshold=<span class="hljs-number">1000000</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="4-1-7-调整GC的触发条件"><a href="#4-1-7-调整GC的触发条件" class="headerlink" title="4.1.7 调整GC的触发条件"></a><strong>4.1.7 调整GC的触发条件</strong></h4><p><strong>CMS调整老年代触发回收比例</strong></p>
+<p>CMS的并发标记和并发清除阶段是用户线程和回收线程并发执行，如果老年代满了再回收会导致用户线程被强制暂停。所以我们修改回收条件为老年代的60%，保证回收时预留足够空间放新对象。CMS默认是老年代68%时触发回收机制。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//使用多少比例的老年代后开始CMS收集，默认是68%，如果频繁发生SerialOld卡顿，应该调小</span><br><br><br><br>-XX:CMSInitiatingOccupancyFraction<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>G1调整存活阈值</strong></p>
+<p>超过存活阈值的Region，其内对象会被混合回收到老年代。G1回收时也要预留空间给新对象。存活阈值默认85%，即当一个内存区块中存活对象所占比例超过 85% 时，这些对象就会通过 Mixed GC 内存整理并晋升至老年代内存区域。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//G1混合垃圾回收周期中要包括的旧区域设置占用率阈值。默认占用率为 65%</span><br><br><br><br>-XX:G1MixedGCLiveThresholdPercent=<span class="hljs-number">65</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-1-8-【最有效】选择合适的垃圾回收器"><a href="#4-1-8-【最有效】选择合适的垃圾回收器" class="headerlink" title="4.1.8 【最有效】选择合适的垃圾回收器"></a><strong>4.1.8 【最有效】选择合适的垃圾回收器</strong></h4><p><strong>JVM调优最实用、最有效的方式是升级垃圾回收器</strong>，根据CPU核数，升级当前版本支持的最新回收器。</p>
+<ul>
+<li>CPU单核，那么毫无疑问Serial 垃圾收集器是你唯一的选择。</li>
+<li>CPU多核，关注吞吐量 ，那么选择Parallel Scavenge+Parallel Old组合（JDK8默认）。</li>
+<li>CPU多核，关注用户停顿时间，JDK版本1.6或者1.7，那么选择ParNew+CMS，吞吐量降低但是低停顿。</li>
+<li>CPU多核，关注用户停顿时间，JDK1.8及以上，JVM可用内存6G以上，那么选择G1。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<p>设置Serial垃圾收集器（新生代）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//修改垃圾回收器</span><br><br><br><br><span class="hljs-comment">//设置Serial垃圾收集器（新生代）</span><br><br><br><br>-XX:+UseSerialGC<br></code></pre></td></tr></table></figure>
+
+<p>设置PS+PO,新生代使用功能Parallel Scavenge 老年代将会使用Parallel Old收集器 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//修改垃圾回收器</span><br><br><br><br> <span class="hljs-comment">//设置PS+PO,新生代使用功能Parallel Scavenge 老年代将会使用Parallel Old收集器</span><br><br><br><br>-XX:+UseParallelOldGC<br></code></pre></td></tr></table></figure>
+
+<p>设置CMS垃圾收集器（老年代） </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"> <span class="hljs-comment">//CMS垃圾收集器（老年代）</span><br><br><br><br>-XX:+UseConcMarkSweepGC<br></code></pre></td></tr></table></figure>
+
+<p>设置G1垃圾收集器 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//修改垃圾回收器</span><br><br><br><br> <span class="hljs-comment">//设置G1垃圾收集器</span><br><br><br><br>-XX:+UseG1GC<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-2-排查大对象"><a href="#4-2-排查大对象" class="headerlink" title="4.2 排查大对象"></a><strong>4.2</strong> 排查大对象</h3><p>使用MAT分析堆转储日志中的大对象，看是否合理。大对象会直接进入老年代，导致Full GC频繁。</p>
+<h4 id="4-2-1-内存溢出"><a href="#4-2-1-内存溢出" class="headerlink" title="4.2.1 内存溢出"></a>4.2.1 内存溢出</h4><p><strong>概念</strong></p>
+<p><strong>内存溢出：</strong> 申请的内存大于系统能提供的内存。</p>
+<p><strong>溢出原因：</strong></p>
+<ul>
+<li><p>**本地直接内存溢出：**本地直接内存设的太小导致溢出。设置直接内存最大值-XX：MaxDirectMemorySize，若不指定则默认与Java堆最大值一致。</p>
+</li>
+<li><p>**虚拟机栈和本地方法栈溢出：**如果虚拟机的栈内存允许动态扩展，并且方法递归层数太深时，导致扩展栈容量时无法申请到足够内存。</p>
+</li>
+<li><p>方法区溢出：</p>
+<p>运行时生成大量动态类时会内存溢出。</p>
+<ul>
+<li>**CGlib动态代理：**CGlib动态代理产生大量类填满了整个方法区（方法区存常量池、类信息、方法信息），直到溢出。CGlib动态代理是在内存中构建子类对象实现对目标对象功能扩展，如果enhancer.setUseCache(false);，即关闭用户缓存，那么每次创建代理对象都是一个新的实例，创建过多就会导致方法区溢出。注意JDK动态代理不会导致方法区溢出。</li>
+<li>**JSP：**大量JSP或动态产生JSP文件的应用（JSP第一次运行时需要编译为Java类）。</li>
+</ul>
+</li>
+<li><p>堆溢出：</p>
+<ul>
+<li>死循环创建过多对象；</li>
+<li>集合类中有对对象的引用，使用完后未清空，使得JVM不能回收；</li>
+<li>内存中加载的数据量过于庞大，如一次从数据库取出的数据集太大、第三方接口接口传输的大对象、接收的MQ消息太大；</li>
+<li>Tomcat参数设置不当导致OOM：Tomcat会给每个线程创建两个默认4M大小的缓冲区，高并发情况下会导致缓冲区创建过多，导致OOM。</li>
+</ul>
+</li>
+<li><p>程序计数器不会内存溢出。</p>
+</li>
+</ul>
+<p><strong>OOM的排查和解决</strong></p>
+<p><strong>使用JDK自带的命令行调优工具 ，判断是否有OOM：</strong></p>
+<ol>
+<li>使用jsp命令查看当前Java进程；</li>
+<li>使用jstat命令多次统计GC，比较GC时长占运行时长的比例；</li>
+<li>如果比例超过20%，就代表堆压力已经很大了；</li>
+<li>如果比例超过98%，说明这段时期内几乎一直在GC，堆里几乎没有可用空间，随时都可能抛出 OOM 异常。</li>
+</ol>
+<p>**MAT定位导致OOM：**示例代码：写死循环创建对象，不断添加到list里，导致堆内存溢出；</p>
+<ol>
+<li><p>JVM参数设置，内存溢出后生成dump文件，设置路径；</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">-<span class="hljs-variable constant_">XX</span><span class="hljs-symbol">:+HeapDumpOnOutOfMemoryError</span>、-<span class="hljs-variable constant_">XX</span><span class="hljs-symbol">:HeapDumpPath</span><br></code></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>MAT解析dump文件；</p>
+</li>
+<li><p>**定位大对象：**点击直方图图标（Histogram），对象会按内存大小排序，查看内存占用最大的对象；<img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/44460d282717268cf15c99a010755e65.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+</li>
+<li><p>**这个对象被谁引用：**点击支配树（dominator tree），看大对象被哪个线程调用。这里可以看到是被主线程调用。<img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/0ba122382c250f0fd05905eab4394b60.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+</li>
+<li><p>**定位具体代码：**点击概述图标（thread_overview），看线程的方法调用链和堆栈信息，查看大对象所属类和第几行，定位到具体代码，解决问题。<img src="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/363b707303828bfd270086cf4e2b6384.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+</li>
+</ol>
+<p><strong>解决方案：</strong></p>
+<ol>
+<li>通过jinfo命令查看并修改JVM参数，直接增加内存。如-Xmx256m</li>
+<li>检查错误日志，查看“OutOfMemory”错误前是否有其它异常或错误。</li>
+<li>对代码进行走查和分析，找出可能发生内存溢出的位置。</li>
+<li>使用内存查看工具动态查看内存使用情况。</li>
+</ol>
+<h4 id="4-2-2-内存泄漏"><a href="#4-2-2-内存泄漏" class="headerlink" title="4.2.2 内存泄漏"></a>4.2.2 内存泄漏</h4><p><strong>概念</strong></p>
+<p><strong>内存泄漏：</strong> 不再使用的对象仍然被引用，导致GC无法回收；</p>
+<p><strong>内存泄露的9种情况：</strong></p>
+<ul>
+<li>**静态容器里的对象：**静态集合类的生命周期与 JVM 程序一致，容器里的对象引用也将一直被引用得不到GC；Java里不准静态方法引用非静态方法也是防止内存泄漏。</li>
+<li>**单例对象引用的外部对象：**单例模式里，如果单例对象如果持有外部对象的引用，因为单例对象不会被回收，那么这个外部对象也不会被回收</li>
+<li>**外部类跟随内部类被引用：**内部类持有外部类，这个内部类对象被长期引用了，即使那个外部类实例对象不再被使用，但由于内部类持有外部类的实例对象，这个外部类对象将不会被垃圾回收，这也会造成内存泄漏。</li>
+<li>**数据库、网络、IO等连接忘记关闭：**在对数据库进行操作的过程中，首先需要建立与数据库的连接，当不再使用时，需要调用 close 方法来释放与数据库的连接。如果对 Connection、Statement 或 ResultSet 不显性地关闭，将会造成大量的对象无法被回收，从而引起内存泄漏。</li>
+<li>**变量作用域不合理：**例如一个变量只会在某个方法中使用，却声明为成员变量，并且被使用后没有被赋值为null，将会导致这个变量明明已经没用了，生命周期却还跟对象一致。</li>
+<li>**HashSet中对象改变哈希值：**当一个对象被存储进 HashSet 集合中以后，就不能修改这个对象中的那些参与计算哈希值的字段了。否则对象哈希值改变，找不到对应的value。</li>
+<li>**缓存引用忘删除：**一旦你把对象引用放入到缓存中，他就很容易遗忘，缓存忘了删除，将导致引用一直存在。</li>
+<li>**逻辑删除而不是真实删除：**监听器和其他回调：如果客户端在你实现的 API 中注册回调，却没有显示的取消，那么就会积聚。需要确保回调立即被当作垃圾回收的最佳方法是只保存它的弱引用，例如将他们保存成为 软WeakHashMap 中的键。例如出栈只是移动了指针，而没有将出栈的位置赋值null，导致已出栈的位置还存在引用。</li>
+<li>**线程池时，ThreadLocal忘记remove()：**使用线程池的时候，ThreadLocal 需要在使用完线程中的线程变量手动 remove()，否则会内存泄漏。因为线程执行完后没有销毁而是被线程池回收，导致ThreadLocal中的对象不能被自动垃圾回收。</li>
+</ul>
+<p><strong>内存泄漏的排查和解决</strong></p>
+<p><strong>性能分析工具判断是否有内存泄漏：</strong></p>
+<ul>
+<li>JDK自带的命令行调优工具：<ul>
+<li>每隔一段较长的时间通过jstat命令采样多组 OU（老年代内存量） 的最小值；</li>
+<li>如果这些最小值在上涨，说明无法回收对象在不断增加，可能是内存泄漏导致的。</li>
+</ul>
+</li>
+<li>MAT监视诊断内存泄漏：<ul>
+<li>**生成堆转储文件：**MAT直接从Java进程导出dump文件</li>
+<li>**可疑点：**查看泄漏怀疑（Leak Suspects），找到内存泄漏可疑点</li>
+<li>**可疑线程：**可疑点查看详情（Details），找到可疑线程</li>
+<li>**定位代码：**查看线程调用栈（See stacktrace），找到问题代码的具体位置。</li>
+</ul>
+</li>
+<li>GC详细日志：启动参数开启GC详细日志，设置日志地址；-XX:+PrintGCDetails；</li>
+<li>编译器警告：查看Eclipse等编译器的内存泄漏警告；</li>
+<li>Java基准测试工具：分析代码性能；</li>
+</ul>
+<p><strong>解决办法：</strong></p>
+<ol>
+<li>牢记内存泄漏的场景，当一个对象不会被使用时，给它的所有引用赋值null，堤防静态容器，记得关闭连接、别用逻辑删除，只要用到了引用，变量的作用域要合理。</li>
+<li>使用java.lang.ref包的弱引用WeakReference，下次垃圾收集器工作时被回收。</li>
+<li>检查代码；</li>
+</ol>
+<h3 id="4-3-CPU飙升和GC频繁的调优方案"><a href="#4-3-CPU飙升和GC频繁的调优方案" class="headerlink" title="4.3 CPU飙升和GC频繁的调优方案"></a><strong>4.3 CPU飙升和GC频繁的调优方案</strong></h3><h4 id="4-3-1-CPU飙升"><a href="#4-3-1-CPU飙升" class="headerlink" title="4.3.1 CPU飙升"></a><strong>4.3.1 CPU飙升</strong></h4><p><strong>原因</strong></p>
+<p>CPU利用率过高，大量线程并发执行任务导致CPU飙升。例如锁等待（例如CAS不断自旋）、<strong>多线程都陷入死循环</strong>、Redis被攻击、网站被攻击、文件IO、网络IO。</p>
+<p><strong>定位步骤</strong></p>
+<ol>
+<li>**定位进程ID：**通过top命令查看当前服务CPU使用最高的进程，获取到对应的pid（进程ID）</li>
+<li>**定位线程ID：**使用top -Hp pid，显示指定进程下面的线程信息，找到消耗CPU最高的线程id</li>
+<li>**线程ID转十六进制：**转十六进制是因为下一步jstack打印的线程快照（线程正在执行方法的堆栈集合）里线程id是十六进制。</li>
+<li>**定位代码：**使用jstack pid | grep tid（十六进制），打印线程快照，找到线程执行的代码。一般如果有死锁的话就会显示线程互相占用情况。</li>
+<li>**解决问题：**优化代码、增加系统资源（增多服务器、增大内存）。</li>
+</ol>
+<h4 id="4-3-2-GC调优"><a href="#4-3-2-GC调优" class="headerlink" title="4.3.2 GC调优"></a><strong>4.3.2 GC调优</strong></h4><p><strong>GC频率的合理范围</strong></p>
+<p>jvm.gc.time：每分钟的GC耗时在1s以内，500ms以内尤佳</p>
+<p>jvm.gc.meantime：每次YGC耗时在100ms以内，50ms以内尤佳</p>
+<p>jvm.fullgc.count：最多几小时FGC一次，1天不到1次尤佳</p>
+<p>jvm.fullgc.time：每次FGC耗时在1s以内，500ms以内尤佳</p>
+<p>**最差情况下能接受的GC频率：**Young GC频率10s一次，每次500ms以内。Full GC频率10min一次，每次1s以内。</p>
+<p>其实一小时一次Full GC已经算频繁了，一个不错的应用起码得控制一天一次Full GC。</p>
+<p><strong>监控发现问题</strong></p>
+<p>上午8点是我们的业务高峰，一到高峰的时候，用户感觉到明显卡顿，监控工具（例如Prometheus和Grafana）发现TP99（99%请求在多少ms内完成）时长明显变高，有明显的的毛刺；内存使用率也不稳定，会周期性增大再降低，于是怀疑是GC导致。</p>
+<p><strong>命令行分析问题</strong></p>
+<p>通过jstat -gc观察服务器的GC情况，发现Young GC频率提高成原来的10倍，Full GC频率提高成原来的四倍。正常YGC 10min一次，FGC 10h一次。异常YGC 1min一次，FGC 3h一次；</p>
+<p>所以主要问题是Young GC频繁，进而导致Full GC频繁。Full GC频繁会触发STW，导致TP99耗时上升。</p>
+<p><strong>解决方案</strong></p>
+<ul>
+<li>排查内存泄漏、大对象、BUG；</li>
+<li>**增大堆内存：**服务器加8G内存条，同时提高初始堆内存、最大堆内存。-Xms、-Xmx。</li>
+<li>**提高新生代比例：**新生代和老年代默认比例是1:2。-XX:NewRatio&#x3D;由4改为默认的2</li>
+<li>**降低升老年龄：**让存活对象更快进入老年代。-XX:InitialTenuringThreshold&#x3D;15（JDK8默认）改成7（JDK9默认）</li>
+<li>**设置大对象阈值：**让大于1M的大对象直接进入老年代。-XX:PretenureSizeThreshold&#x3D;0（默认）改为1000000（单位是字节）</li>
+<li>**垃圾回收器升级为G1：**因为是JDK8，所以直接由默认的Parallel Scavenge+Parallel Old组合，升级为低延时的G1回收器。如果是JDK7版本，不支持G1，可以修改成ParNew+CMS或Parallel Scavenge+CMS，以降低吞吐量为代价降低停顿时间。-XX:CMSInitiatingOccupancyFraction</li>
+<li>**降低G1的存活阈值：**超过存活阈值的Region，其内对象会被混合回收到老年代。降低存活阈值，更早进入老年代。-XX:G1MixedGCLiveThresholdPercent&#x3D;90设为默认的85</li>
+</ul>
+<p><strong>调优效果</strong></p>
+<p>调优后我们重新进行了一次压测，发现TP99耗时较之前降低60%。FullGC耗时降低80%，YoungGC次数减少30%。TP99耗时基本持平，完全符台预期。</p>
+<h3 id="4-4-其他优化方案"><a href="#4-4-其他优化方案" class="headerlink" title="4.4 其他优化方案"></a><strong>4.4 其他优化方案</strong></h3><h4 id="4-4-1-优化业务代码"><a href="#4-4-1-优化业务代码" class="headerlink" title="4.4.1 优化业务代码"></a><strong>4.4.1 优化业务代码</strong></h4><p>绝大部分问题都出自代码。</p>
+<p>日常开发中，要尽量减少非必要对象的创建，防止死循环创建对象，注意内存泄漏的12个场景，防止内存泄漏。</p>
+<p>在一些内存占用率高的场景下需要以时间换空间，控制内存使用。</p>
+<h4 id="4-4-2-增加机器"><a href="#4-4-2-增加机器" class="headerlink" title="4.4.2 增加机器"></a><strong>4.4.2 增加机器</strong></h4><p>在集群下新增加几个服务器，分散节点压力，可以提高整体效率。</p>
+<h4 id="4-4-3-调整线程池参数"><a href="#4-4-3-调整线程池参数" class="headerlink" title="4.4.3 调整线程池参数"></a><strong>4.4.3 调整线程池参数</strong></h4><p>合理设置线程池的线程数量。</p>
+<p>下面的参数只是一个预估值，适合初步设置，具体的线程数需要经过压测确定，压榨（更好的利用）CPU的性能。</p>
+<p><strong>记CPU核心数为N；</strong></p>
+<p><strong>核心线程数：</strong></p>
+<ul>
+<li>CPU密集型：N+1。数量与CPU核数相近是为了不浪费CPU，并防止频繁的上下文切换，加1是为了有线程被阻塞后还能不浪费CPU的算力。</li>
+<li>**I&#x2F;O密集型：**2N，或N&#x2F;(1-阻塞系数)。I&#x2F;O密集型任务CPU使用率并不是很高，可以让CPU在等待I&#x2F;O操作的时去处理别的任务，充分利用CPU，所以数量就比CPU核心数高一倍。有些公司会考虑阻塞系数，阻塞系数是任务线程被阻塞的比例，一般是0.8~0.9。</li>
+<li>**实际开发中更适合的公式：*<em>N</em>((线程等待时间+线程计算时间)&#x2F;线程计算时间)</li>
+</ul>
+<p>**最大线程数：**设成核心线程数的2-4倍。数量主要由CPU和IO的密集性、处理的数据量等因素决定。</p>
+<p>**需要增加线程的情况：**jstack打印线程快照，如果发现线程池中大部分线程都等待获取任务、则说明线程够用。如果大部分线程都处于运行状态，可以继续适当调高线程数量。</p>
+<p>**jstack：**打印指定进程此刻的线程快照。定位线程长时间停顿的原因，例如死锁、等待资源、阻塞。如果有死锁会打印线程的互相占用资源情况。线程快照：该进程内每条线程正在执行的方法堆栈的集合。</p>
+<h4 id="4-4-4-缓存、MQ等中间件优化"><a href="#4-4-4-缓存、MQ等中间件优化" class="headerlink" title="4.4.4 缓存、MQ等中间件优化"></a><strong>4.4.4 缓存、MQ等中间件优化</strong></h4><p>使用中间件提高程序效率，比如缓存、消息队列等</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/JAVA/" class="category-chain-item">JAVA</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/JAVA/JVM/" class="category-chain-item">JVM</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/JAVA/" class="print-no-link">#JAVA</a>
+      
+        <a href="/tags/JVM/" class="print-no-link">#JVM</a>
+      
+        <a href="/tags/%E8%B0%83%E4%BC%98/" class="print-no-link">#调优</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>JVM调优实战</div>
+      <div>https://aotomata.me/2023/04/30/JVM调优实战/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>吕书科</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年4月30日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/" title="Spring Cloud Alibaba实战，从微服务架构到基本服务配置（源码）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Spring Cloud Alibaba实战，从微服务架构到基本服务配置（源码）</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/01/12/2022%E5%B9%B4%E5%BA%A6%E6%AD%8C%E5%8D%95/" title="2022年度歌单">
+                        <span class="hidden-mobile">2022年度歌单</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

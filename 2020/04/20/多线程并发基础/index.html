@@ -22,18 +22,18 @@
     <meta name="description" content="1、多线程概述一、多线程1、什么是进程?什么是线程?进程是一个应用程序(1个进程是一个软件)。 线程是一个进程中的执行场景&#x2F;执行单元。 一个进程可以启动多个线程。  对于java程序来说，当在DOS命令窗口中输入:java HelloWorld 回车之后。会先启动JVM，而JVM就是一个进程。JVM再启动一个主线程调用main方法.同时再启动一个垃圾回收线程负责看护，回收垃圾。最起码，现">
 <meta property="og:type" content="article">
 <meta property="og:title" content="多线程并发基础">
-<meta property="og:url" content="http://example.com/2020/04/20/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:url" content="https://aotomata.me/2020/04/20/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91%E5%9F%BA%E7%A1%80/index.html">
 <meta property="og:site_name" content="Automata">
 <meta property="og:description" content="1、多线程概述一、多线程1、什么是进程?什么是线程?进程是一个应用程序(1个进程是一个软件)。 线程是一个进程中的执行场景&#x2F;执行单元。 一个进程可以启动多个线程。  对于java程序来说，当在DOS命令窗口中输入:java HelloWorld 回车之后。会先启动JVM，而JVM就是一个进程。JVM再启动一个主线程调用main方法.同时再启动一个垃圾回收线程负责看护，回收垃圾。最起码，现">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/java.png">
+<meta property="og:image" content="https://aotomata.me/img/java.png">
 <meta property="article:published_time" content="2020-04-19T16:00:00.000Z">
 <meta property="article:modified_time" content="2025-03-13T14:51:06.218Z">
 <meta property="article:author" content="吕书科">
 <meta property="article:tag" content="JAVA">
 <meta property="article:tag" content="并发">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/java.png">
+<meta name="twitter:image" content="https://aotomata.me/img/java.png">
   
   
   
@@ -75,7 +75,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+    var CONFIG = {"hostname":"aotomata.me","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -559,7 +559,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>多线程并发基础</div>
-      <div>http://example.com/2020/04/20/多线程并发基础/</div>
+      <div>https://aotomata.me/2020/04/20/多线程并发基础/</div>
     </div>
     <div class="license-meta">
       

@@ -1,0 +1,878 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/YoRHa.ico">
+  <link rel="icon" href="/img/YoRHa.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="吕书科">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1 目标 理解什么是微服务架构 理解什么是springcloud及spring cloud alibaba和springcloud的关系 掌握使用springcloud alibaba 实现微服务远程调用 掌握使用springcloud alibaba 实现服务注册与发现 掌握使用springcloud alibaba 实现基本的服务配置  2 微服务架构2.1 架构的演变 (1)单一应用架构 当">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Cloud Alibaba实战，从微服务架构到基本服务配置（源码）">
+<meta property="og:url" content="https://aotomata.me/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/index.html">
+<meta property="og:site_name" content="Automata">
+<meta property="og:description" content="1 目标 理解什么是微服务架构 理解什么是springcloud及spring cloud alibaba和springcloud的关系 掌握使用springcloud alibaba 实现微服务远程调用 掌握使用springcloud alibaba 实现服务注册与发现 掌握使用springcloud alibaba 实现基本的服务配置  2 微服务架构2.1 架构的演变 (1)单一应用架构 当">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://aotomata.me/img/springCloudAlibaba.jpg">
+<meta property="article:published_time" content="2023-08-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-24T18:29:14.639Z">
+<meta property="article:author" content="吕书科">
+<meta property="article:tag" content="JAVA">
+<meta property="article:tag" content="springCloud">
+<meta property="article:tag" content="微服务">
+<meta property="article:tag" content="springCloudAlibaba">
+<meta property="article:tag" content="Nacos">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aotomata.me/img/springCloudAlibaba.jpg">
+  
+  
+  
+  <title>Spring Cloud Alibaba实战，从微服务架构到基本服务配置（源码） - Automata</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"aotomata.me","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Automata</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/springCloudAlibaba.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Spring Cloud Alibaba实战，从微服务架构到基本服务配置（源码）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-08-21 00:00" pubdate>
+          2023年8月21日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          42 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Spring Cloud Alibaba实战，从微服务架构到基本服务配置（源码）</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="1-目标"><a href="#1-目标" class="headerlink" title="1 目标"></a>1 目标</h2><ul>
+<li>理解什么是<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=201258851&content_type=Article&match_order=1&q=%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDMwMTMwNTUsInEiOiLlvq7mnI3liqHmnrbmnoQiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyMDEyNTg4NTEsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.OKlpJhKp_RQQCiec40Y1vH8CBWmri1MxvgMV0OlEcJw&zhida_source=entity">微服务架构</a></li>
+<li>理解什么是springcloud及spring cloud alibaba和springcloud的关系</li>
+<li>掌握使用springcloud alibaba 实现微服务远程调用</li>
+<li>掌握使用springcloud alibaba 实现服务注册与发现</li>
+<li>掌握使用springcloud alibaba 实现基本的服务配置</li>
+</ul>
+<h2 id="2-微服务架构"><a href="#2-微服务架构" class="headerlink" title="2 微服务架构"></a>2 微服务架构</h2><h3 id="2-1-架构的演变"><a href="#2-1-架构的演变" class="headerlink" title="2.1 架构的演变"></a>2.1 架构的演变</h3><p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-73bc0b9ad2c3a0d7e9f1122d33d563ca_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>(1)单一应用架构</strong></p>
+<p>当网站流量很小时，只需要一个应用，所有功能部署在一起，减少部署节点成本的框架称之为集中式框架。此时，用于简化增删改查工作量的数据访问框架(ORM)是影响项目开发的关键。</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-4c7b195775e6f7810b1c577d9f839bab_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>(2)垂直应用架构</strong></p>
+<p>当访问量逐渐增大，单一应用增加机器带来的加速度越来越小，将应用拆成互不相干的几个应用，以提升效率。此时，用于加速前端页面开发的Web框架(MVC)是关键。</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-7381b29789a11b51af98e489735c0c5a_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>(3)分布式服务架构</strong></p>
+<p>当垂直应用越来越多，应用之间交互不可避免，将核心业务抽取出来，作为独立的服务，逐渐形成稳定的服务中心，使前端应用能更快速的响应多变的市场需求。此时，用于提高业务复用及整合的分布式服务框架(RPC)是关键。</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-fc5a34077fa003c4d9f7cf00d9d00ab0_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>(4)面向服务(SOA)架构</strong></p>
+<p>典型代表有两个：流动计算架构和微服务架构；</p>
+<p><strong>流动计算架构：</strong></p>
+<p>当服务越来越多，容量的评估，小服务资源的浪费等问题逐渐显现，此时需增加一个调度中心基于访问压力实时管理集群容量，提高集群利用率。此时，用于提高机器利用率的资源调度和治理中心(SOA)是关键。流动计算架构的最佳实践阿里的<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=201258851&content_type=Article&match_order=1&q=Dubbo&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDMwMTMwNTUsInEiOiJEdWJibyIsInpoaWRhX3NvdXJjZSI6ImVudGl0eSIsImNvbnRlbnRfaWQiOjIwMTI1ODg1MSwiY29udGVudF90eXBlIjoiQXJ0aWNsZSIsIm1hdGNoX29yZGVyIjoxLCJ6ZF90b2tlbiI6bnVsbH0.FgfmHho7KtNNVm7s2K9ps-OkAq9Lkkzkr2CMaxFe0UI&zhida_source=entity">Dubbo</a>。</p>
+<p><strong>微服务架构</strong></p>
+<p>与流动计算架构很相似，除了具备流动计算架构优势外，微服务架构中的微服务可以独立部署，独立发展。且微服务的开发不会限制于任何技术栈。微服务架构的最佳实践是<strong>SpringCloud及<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=201258851&content_type=Article&match_order=1&q=Spring+Cloud+Alibaba&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDMwMTMwNTUsInEiOiJTcHJpbmcgQ2xvdWQgQWxpYmFiYSIsInpoaWRhX3NvdXJjZSI6ImVudGl0eSIsImNvbnRlbnRfaWQiOjIwMTI1ODg1MSwiY29udGVudF90eXBlIjoiQXJ0aWNsZSIsIm1hdGNoX29yZGVyIjoxLCJ6ZF90b2tlbiI6bnVsbH0.d-XUSPB11rWbb-ShubP402OK9oeFOySvi-3dyxBuNBw&zhida_source=entity">Spring Cloud Alibaba</a></strong>。</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-5cad3299ab8a5c4417fdf8ca04401fe7_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h3 id="2-2-微服务架构"><a href="#2-2-微服务架构" class="headerlink" title="2.2 微服务架构"></a>2.2 微服务架构</h3><p> 微服务架构（MicroserviceArchitect）是一种架构模式，它提倡将单块架构的应用划分成一组小的服务，服务之间互相协调、互相配合，为用户提供最终价值。每个服务运行在其独立的进程中，服务与服务间采用轻量级的通信机制互相沟通。每个服务都围绕着具体业务进行构建，并且能够被独立的部署到生产环境、类生产环境（测试环境）等.</p>
+<p>相比传统SOA的服务实现方式，微服务更具有灵活性、可实施性以及可扩展性，其强调的是一种独立测试、独立部署、独立运行的软件架构模式。</p>
+<p>即便了解了上面的介绍，也很难对微服务下一个准确的定义。实际上，从业界的讨论来看,微服务本身并没有一个严格的定义，ThoughtWorks首席科学家马丁福勒对微服务进行的一段描述：</p>
+<p> 微服务架构是一种架构模式，它提倡将单一应用程序划分成一组小的服务，服务之间互相协调、互相配合，为用户提供最终价值。每个服务运行在其独立的进程中，服务与服务间采用轻量级的通信机制互相沟通（通常是基于HTTP协议的RESTful API）。每个服务都围绕着具体业务进行构建，并且能够被独立的部署到生产环境、类生产环境等。另外，应当尽量避免统一的、集中式的服务管理机制，对具体的一个服务而言，应根据业务上下文，选择合适的语言、工具对其进行构建。</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-0a11e170683bf77b4a0bfa17b70c93fa_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>微服务架构特点总结：</strong></p>
+<p>小, 且专注于做一件事情； 独立的进程中； 轻量级的通信机制； 松耦合、独立部署；</p>
+<p><strong>简单理解：</strong></p>
+<p>将原本所有的功能放到一个应用中的系统，根据功能模块 进行合理的拆分 拆分成独立的 可运行和部署的子系统;子系统之间通过轻量级协议进行通信（http）,我们将这种架构称为微服务架构。</p>
+<h2 id="3-Spring-Cloud-Alibaba"><a href="#3-Spring-Cloud-Alibaba" class="headerlink" title="3 Spring Cloud Alibaba"></a>3 Spring Cloud Alibaba</h2><h3 id="3-1-Spring-cloud"><a href="#3-1-Spring-cloud" class="headerlink" title="3.1 Spring cloud"></a>3.1 Spring cloud</h3><p>微服务架构也会带来一些问题需要我们去解决,例如:</p>
+<p>服务通信用什么解决？ 服务管理用什么解决？ 服务越来越多，配置文件越来越多该如何统一管理？ …</p>
+<p><strong>以上都可以通过一些现有的技术框架来解决，但是这些技术框架需要整合在一块相对对开发人员的技术要求较高，另外也有些兼容性问题需要解决。相对比较麻烦。所以如果有一个框架 能解决上边的问题，并且隐藏掉技术细节，框架极好的集成和兼容就再好不过了，所以技术框架下就有了spring cloud 和spring cloud alibaba.</strong></p>
+<p>以下摘自百度百科：</p>
+<p>Spring Cloud是一系列框架的有序集合。它利用Spring Boot的开发便利性巧妙地简化了分布式系统基础设施的开发，如服务发现注册、配置中心、消息总线、负载均衡、断路器、数据监控等，都可以用Spring Boot的开发风格做到一键启动和部署。Spring Cloud并没有重复制造轮子，它只是将各家公司开发的比较成熟、经得起实际考验的服务框架组合起来，通过Spring Boot风格进行再封装屏蔽掉了复杂的配置和实现原理，最终给开发者留出了一套简单易懂、易部署和易维护的分布式系统开发工具包.</p>
+<p>简单理解总结一句话：</p>
+<p>spring cloud 是基于springboot的开发工具包,是将流行的成熟的框架整合到一块。目的：就是简化配置，提供一套简单易用的工具用于快速开发分布式系统（微服务），提高开发效率。</p>
+<h3 id="3-2-Spring-cloud-alibaba"><a href="#3-2-Spring-cloud-alibaba" class="headerlink" title="3.2 Spring cloud alibaba"></a>3.2 Spring cloud alibaba</h3><p> 同 Spring Cloud 一样，Spring Cloud Alibaba 也是一套微服务解决方案，包含开发分布式应用微服务的必需组件，方便开发者通过 Spring Cloud 编程模型轻松使用这些组件来开发分布式应用服务。</p>
+<p>依托 Spring Cloud Alibaba，您只需要添加一些注解和少量配置，就可以将 Spring Cloud 应用接入阿里微服务解决方案，通过阿里中间件来迅速搭建分布式应用系统。</p>
+<p><a href="https://link.zhihu.com/?target=https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md">https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md</a></p>
+<p>提供的功能和组件包括如下：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-6bc8f9ee6675f440a2699e8449da3940_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-531a47041ec0c553fa37d6dcd9c40752_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>Spring Cloud 和Spring Cloud Alibaba的关系：可以简单理解成 <strong>集团和子公司</strong>的关系。</p>
+<h3 id="3-3-使用版本注意"><a href="#3-3-使用版本注意" class="headerlink" title="3.3 使用版本注意"></a>3.3 使用版本注意</h3><p><strong>spring cloud的版本说明</strong>：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-8a787531015efe4b4b6570c10cb8f287_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>SpringCloud是一系列框架组合，为了避免与框架版本产生混淆，采用新的版本命名方式，形式为大版本名+子版本名称</p>
+<p>大版本名用伦敦地铁站名</p>
+<p>子版本名称三种</p>
+<p>SNAPSHOT：快照版本，尝鲜版，随时可能修改</p>
+<p>M版本，MileStone，M1表示第一个里程碑版本，一般同时标注PRE，表示预览版</p>
+<p>SR，Service Release，SR1表示第一个正式版本，同时标注GA(Generally Available)，稳定版</p>
+<p>另外：</p>
+<p>最新版本已经更新了不再以地铁名为依据，并移除掉了一些组件例如：spring cloud netflex 中的一些组件</p>
+<p>新的命名方式说明大家可以看下官方说明：</p>
+<p><a href="https://link.zhihu.com/?target=https://spring.io/blog/2020/04/17/spring-cloud-2020-0-0-m1-released">Spring Cloud 2020.0.0-M1 Released</a></p>
+<p><strong>spring cloud alibaba使用的时候版本说明</strong>：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-bf49a1b3c37374d4a3d5c840d2ea4c3c_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-3f8639514e3eabfdb222710bf5431535_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>重要：鉴于SpringBoot与SpringCloud关系，SpringBoot建议采用2.2.x版本或者2.3.x,这里我们采用的版本为：</p>
+<p>Hoxton SR9 spring boot 2.3.8</p>
+<h2 id="4-微服务远程调用"><a href="#4-微服务远程调用" class="headerlink" title="4 微服务远程调用"></a>4 微服务远程调用</h2><h3 id="4-1-应用场景"><a href="#4-1-应用场景" class="headerlink" title="4.1 应用场景"></a>4.1 应用场景</h3><p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-93c2a354d7b71a5927e6f0bdb1c0a04b_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>以上就是有个应用场景例如：订单微服务 需要获取到商品信息，则需要订单微服务 远程调用 商品微服务获取到商品的信息，然后再返回给用户展示。</p>
+<h3 id="4-2-Spring-Cloud-OpenFeign介绍"><a href="#4-2-Spring-Cloud-OpenFeign介绍" class="headerlink" title="4.2 Spring Cloud OpenFeign介绍"></a>4.2 Spring Cloud <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=201258851&content_type=Article&match_order=1&q=OpenFeign&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDMwMTMwNTUsInEiOiJPcGVuRmVpZ24iLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyMDEyNTg4NTEsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.x6QCYILJ-W1oKu5beqKpV3tVaL0CknRxK-Qxh1EpduM&zhida_source=entity">OpenFeign</a>介绍</h3><p> Spring Cloud OpenFeign 是声明式的服务调用工具，它整合了<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=201258851&content_type=Article&match_order=1&q=Ribbon&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDMwMTMwNTUsInEiOiJSaWJib24iLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyMDEyNTg4NTEsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.2waYUYuZFn9ly7jaTgdaFl7qfbjAcjJYI6236Wwojxk&zhida_source=entity">Ribbon</a>等其他组件，拥有负载均衡和服务容错功能.</p>
+<p>Feign是声明式的服务调用工具，我们只需创建一个接口并用注解的方式来配置它，就可以实现对某个服务接口的调用，简化了直接使用RestTemplate来调用服务接口的开发量。Feign具备可插拔的注解支持，同时支持Feign注解、JAX-RS注解及SpringMvc注解。当使用Feign时，Spring Cloud集成了Ribbon和<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=201258851&content_type=Article&match_order=1&q=Eureka&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NDMwMTMwNTUsInEiOiJFdXJla2EiLCJ6aGlkYV9zb3VyY2UiOiJlbnRpdHkiLCJjb250ZW50X2lkIjoyMDEyNTg4NTEsImNvbnRlbnRfdHlwZSI6IkFydGljbGUiLCJtYXRjaF9vcmRlciI6MSwiemRfdG9rZW4iOm51bGx9.mxSfymIrAri8qasVjy1lClvAdkVsoN_i7GmyiHRsyW0&zhida_source=entity">Eureka</a>以提供负载均衡的服务调用.</p>
+<p>fegin 本身是一个组件 整合到spring cloud 之后 就命名为spring cloud openFeign.</p>
+<h3 id="4-3-OpenFeign入门使用"><a href="#4-3-OpenFeign入门使用" class="headerlink" title="4.3 OpenFeign入门使用"></a>4.3 OpenFeign入门使用</h3><p>基于以上的应用场景，通过代码的方式入门服务调用有多简单。</p>
+<p>开发步骤：</p>
+<p>1.搭建工程 管理版本 2.创建2个微服务 3.加入起步依赖 并实现远程调用</p>
+<p><strong>4.3.1 创建工程</strong></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-723effcf480b635b7b772b90da317430_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>如上图所示：cloud-test工程pom.xml:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.itheima<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>cloud-test<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">modules</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>cloud-test-consumer<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>cloud-test-provider<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">modules</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">packaging</span>&gt;</span>pom<span class="hljs-tag">&lt;/<span class="hljs-name">packaging</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.3.8.RELEASE<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span><br>        <span class="hljs-comment">&lt;!--spring cloud版本--&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">spring.cloud-version</span>&gt;</span>Hoxton.SR9<span class="hljs-tag">&lt;/<span class="hljs-name">spring.cloud-version</span>&gt;</span><br>        <span class="hljs-comment">&lt;!--jdk版本--&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">java.version</span>&gt;</span>1.8<span class="hljs-tag">&lt;/<span class="hljs-name">java.version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">skipTests</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">skipTests</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependencyManagement</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>            <span class="hljs-comment">&lt;!--spring cloud--&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-dependencies<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>$&#123;spring.cloud-version&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>pom<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>import<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-comment">&lt;!--spring cloud alibaba--&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-alibaba-dependencies<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.2.5.RELEASE<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>pom<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>import<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependencyManagement</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>cloud-test-provider工程pom.xml如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>cloud-test<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.itheima<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>cloud-test-provider<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>        <span class="hljs-comment">&lt;!--配置feign--&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-starter-openfeign<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-comment">&lt;!--web起步依赖--&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">build</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">plugins</span>&gt;</span><br>            <span class="hljs-comment">&lt;!--springboot maven插件--&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">plugin</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">plugin</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">plugins</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">build</span>&gt;</span><br><br><span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>启动类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ProviderApplication</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        SpringApplication.run(ProviderApplication.class,args);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>yml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">server:</span><br>  <span class="hljs-attr">port:</span> <span class="hljs-number">8081</span><br><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">application:</span><br>    <span class="hljs-attr">name:</span> <span class="hljs-string">provider</span><br></code></pre></td></tr></table></figure>
+
+<p>cloud-test-consumer工程pom.xml如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>cloud-test<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.itheima<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>cloud-test-consumer<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>        <span class="hljs-comment">&lt;!--web起步依赖--&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br>        <span class="hljs-comment">&lt;!--配置feign--&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-starter-openfeign<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">build</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">plugins</span>&gt;</span><br>            <span class="hljs-comment">&lt;!--springboot maven插件--&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">plugin</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">plugin</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">plugins</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">build</span>&gt;</span><br><br><span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>启动类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ConsumerApplication</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        SpringApplication.run(ConsumerApplication.class,args);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>yml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">server:</span><br>  <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">application:</span><br>    <span class="hljs-attr">name:</span> <span class="hljs-string">consumer</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>4.3.2 实现远程调用</strong></p>
+<p>provider端创建商品controller：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ItemController</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取商品的信息</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> id</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@GetMapping(&quot;/item/&#123;id&#125;&quot;)</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getInfo</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable(name = &quot;id&quot;)</span> String id)</span> &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">itemInfo</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;SN:&quot;</span> + id;<br>        <span class="hljs-keyword">return</span> itemInfo;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>consumer端创建订单controller,并实现远程调用:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">OrderController</span> &#123;<br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ItemFeign itemFeign;<br><br>    <span class="hljs-meta">@GetMapping(&quot;/doOrder&quot;)</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">doOrder</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">//1.模拟远程调用获取到到商品信息</span><br>        <span class="hljs-type">String</span> <span class="hljs-variable">info</span> <span class="hljs-operator">=</span> itemFeign.getItemInfo(<span class="hljs-string">&quot;1&quot;</span>);<br>        <span class="hljs-comment">//2.模拟下单</span><br>        System.out.println(<span class="hljs-string">&quot;张三:下单成功,商品信息为：&quot;</span>+info);<br>        <span class="hljs-comment">//3.模拟返回成功信息</span><br>        <span class="hljs-keyword">return</span> info;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>按照feign的使用创建feign接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@FeignClient(name=&quot;provider&quot;,url = &quot;127.0.0.1:8081&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ItemFeign</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 根据用户ID 获取用户名</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> id</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@GetMapping(&quot;/item/&#123;id&#125;&quot;)</span><br>    String <span class="hljs-title function_">getItemInfo</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable(name=&quot;id&quot;)</span> String id)</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>解释：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-attr">@FeignClient(name</span>=<span class="hljs-string">&quot;provider&quot;,url = &quot;127.0.0.1:8081&quot;)  指定注解 标识 该类为Feign接口</span><br><span class="hljs-attr">name</span> <span class="hljs-string">指定要调用的服务名(目前随便填)</span><br><span class="hljs-attr">url</span> <span class="hljs-string">指定要调用的服务（provider）的ip和端口</span><br><br><br><span class="hljs-attr">该接口中的方法</span> <span class="hljs-string">和 被调用方法的controller中保持一致（即是应当声明一个接口的方法 和 controller一致）</span><br><br><span class="hljs-attr">@GetMapping(&quot;/item/&#123;id&#125;&quot;)</span><br><span class="hljs-attr">String</span> <span class="hljs-string">getItemInfo(@PathVariable(name=&quot;id&quot;) String id);</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>接口编写的要求如下：</strong></p>
+<p><strong>1.接口的方法返回值 和 被调用方controller中的方法的返回值保持一致</strong></p>
+<p><strong>2.接口的方法的请求路径 和 被调用方controller中的请求路径保持一致</strong></p>
+<p><strong>3.接口的参数类型和参数个数 和被调用方controller中的方法的参数类型和个数保持一致</strong></p>
+<p><strong>4.接口的方法参数需要修饰注解，并设置相关属性例如：@PathVariable(name &#x3D; “id”) @RequestParam(name&#x3D;”name”) @RequestBody</strong></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-74b81a306740a7bb69f4e5de623fe98c_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>启动类中添加注解启用feignclients:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-meta">@EnableFeignClients</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ConsumerApplication</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        SpringApplication.run(ConsumerApplication.class,args);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-52d0b7563455f707609ef30b47eb7d5a_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h2 id="5-微服务注册与发现"><a href="#5-微服务注册与发现" class="headerlink" title="5 微服务注册与发现"></a>5 微服务注册与发现</h2><h3 id="5-1-NACOS介绍"><a href="#5-1-NACOS介绍" class="headerlink" title="5.1 NACOS介绍"></a>5.1 NACOS介绍</h3><p><strong>5.1.1 应用场景</strong></p>
+<p>当服务调用越来越多，服务的地址需要管理起来，并实现动态调用而不是硬编码在接口中。此时需要一个注册中心来帮助我们管理服务。</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-b75638c91c35360abbbf4f15b87a7bbd_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>1.商品微服务注册IP和端口到注册中心 2.订单微服务先从注册中心获取到商品微服务的IP和端口 3.订单微服务中使用获取到的IP和端口执行远程调用</p>
+<p><strong>5.1.2 NACOS介绍</strong></p>
+<p>NACOS是一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。简单来说：NACOS就是一个注册中心 ，用来实现服务的注册与发现。</p>
+<p>Github:<a href="https://link.zhihu.com/?target=https://github.com/alibaba/Nacos">https://github.com/alibaba/Nacos</a></p>
+<h3 id="5-2-NACOS作为注册中心使用"><a href="#5-2-NACOS作为注册中心使用" class="headerlink" title="5.2 NACOS作为注册中心使用"></a><strong>5.2 NACOS作为注册中心使用</strong></h3><p>如上图所示 ，当我们将NACOS作为注册中心来使用，那么就需要满足三个条件 有一个注册 有两个微服务 并且向注册中心进行注册并发现服务 实现远程调用。</p>
+<p>使用步骤：</p>
+<p>1.搭建nacos注册中心 2.搭建微服务并向nacos进行注册 3.实现远程调用。</p>
+<p><strong>5.2.1 搭建注册中心</strong></p>
+<p>（1）下载 zip 如图所示</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-714cc049ffb5af6aedd2a7341936c0ca_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>（2）解压zip</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-7e4c2a2fd0f043fed1a8022199aff67b_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>(3)双击如图所示的脚本启动</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-9cbba77c464484d7957566451f6d1780_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>（4）访问地址验证是否启动成功</p>
+<p>浏览器中访问：<a target="_blank" rel="noopener" href="http://localhost:8848/nacos">http://localhost:8848/nacos</a></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-bcb810f49aa0d344e61bfe926924ec87_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>输入用户名和密码：</p>
+<p>nacos&#x2F;nacos</p>
+<p>出现如下画面说明搭建正确：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-a567711cdfe8206638d2868324d9864d_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>5.2.2 实现服务的注册与发现</strong></p>
+<p>实现步骤</p>
+<p>1.搭建微服务consumer 并实现注册与发现 2.搭建微服务provider 并实现注册与发现 3.修改feign 实现远程调用（非硬编码方式）</p>
+<p><strong>5.2.2.1 消费端</strong></p>
+<p>(1)在cloud -consumer-test工程中添加依赖：（依赖的版本参考之前的使用版本注意）</p>
+<p>可以参考官方说明：</p>
+<p><a href="https://link.zhihu.com/?target=https://nacos.io/zh-cn/docs/quick-start-spring-cloud.html">https://nacos.io/zh-cn/docs/quick-start-spring-cloud.html</a></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>(2)启动类中添加注解如下：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-36109342c7d9f532ede622d263449841_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>（3）yaml中进行配置：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-cb7ae2d25c919ccd7aa4186c7e4e7cdd_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>5.2.2.2 提供端</strong></p>
+<p>(1)在cloud -provider-test工程中添加依赖：（依赖的版本参考之前的使用版本注意）</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>(2)启动类中添加注解 开启服务注册和发现</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-b9f7961a763f795ebab190f2bddb0f65_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>(3)配置yaml</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-291f111f488355fb3f87202e6b416a71_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>(4)进行测试查看：</p>
+<p>启动consumer 和provider 和注册中心</p>
+<p>在nacos的控制台界面就可以看到如下效果：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-be2e1f550b256b1b2eae4a6461999b72_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>5.2.2.3 动态远程调用</strong></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-d95e9afa0453931c46c19faea81bd00e_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>修改接口之后，重新启动一次 再次进行调用如下效果：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-e129ffdcc1daa2c1f9a89e3b2162a4c4_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>照样能获取到结果。</p>
+<p>控制台输出如下</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-840f8e0b62c6fa40fe368b418dab78b3_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>由此可以看出：实际上nacos添加之后，默认从注册中心根据服务名动态获取到ip和端口 并实现远程调用。</p>
+<h2 id="6-微服务实现服务配置"><a href="#6-微服务实现服务配置" class="headerlink" title="6 微服务实现服务配置"></a>6 微服务实现服务配置</h2><h3 id="6-1-应用场景"><a href="#6-1-应用场景" class="headerlink" title="6.1 应用场景"></a>6.1 应用场景</h3><p> 随着业务的发展、微服务架构的升级，服务的数量、程序的配置日益增多（各种微服务、各种服务器地址、各种参数），传统的配置文件方式和数据库的方式已无法满足开发人员对配置管理的要求：</p>
+<ul>
+<li>安全性：配置跟随源代码保存在代码库中，容易造成配置泄漏</li>
+<li>时效性：修改配置，需要重启服务才能生效</li>
+<li>局限性：无法支持动态调整：例如日志开关、功能开关</li>
+</ul>
+<p>因此，我们需要配置中心来统一管理配置文件。例如：一旦配置修改，则应用即可立即生效。不需要重启微服务。</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-3a4d2f57519f5cc37dac4568efea8115_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h3 id="6-2-NACOS作为配置中心使用"><a href="#6-2-NACOS作为配置中心使用" class="headerlink" title="6.2 NACOS作为配置中心使用"></a>6.2 NACOS作为配置中心使用</h3><p>以上，配置中心 可以有很多的技术，这里我们使用NACOS作为配置中心使用也是可以的。结合之前我们使用的注册中心 NACOS 可以两用。</p>
+<p>使用步骤：</p>
+<p>1.需求：获取配置文件中的jdbc.url中的值，并可以在线进行编辑修改 不需要重启系统即能生效 2.搭建配置中心服务 3.搭建微服务（consumer或者provider）此处我们以consumer来作为案例 4.实现在线编辑 之后立即生效</p>
+<p><strong>6.2.1 搭建配置中心</strong></p>
+<p>该配置中心已经搭建，就是之前搭建的nacos server端。控制台如下，将来我们的配置文件全部在如下左框所示下进行配置。</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-cac525a753c1d5ef4ec52c2502ab3e4d_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>6.2.2 微服务中使用Nacos</strong></p>
+<p><strong>6.2.2.1 添加起步依赖</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs haxeml">&lt;dependency&gt;<br>    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;<br>    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-config&lt;/artifactId&gt;<br>&lt;/dependency&gt;<br></code></pre></td></tr></table></figure>
+
+<p><strong>6.2.2.2 配置yaml</strong></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-46a18600b285a7aee4d044d90c2b7d83_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>6.2.2.3 控制台（配置中心）进行配置</strong></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-8c83a18399c9fdfd8b7d137c139504d6_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>（稍微注意下目前就是只能用properites）</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-7a67f974fe5d544c170cffae31919727_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p><strong>6.2.2.4 代码中进行测试</strong></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-6cf05f6a2c0ba4f24c8fdd3e91aa727b_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RefreshScope</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">OrderController</span> &#123;<br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ItemFeign itemFeign;<br><br>    <span class="hljs-meta">@Value(&quot;$&#123;jdbc.url&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> String url;<br><br>    <span class="hljs-meta">@GetMapping(&quot;/doOrder&quot;)</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">doOrder</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">//1.模拟远程调用获取到到商品信息</span><br>        <span class="hljs-type">String</span> <span class="hljs-variable">info</span> <span class="hljs-operator">=</span> itemFeign.getItemInfo(<span class="hljs-string">&quot;1&quot;</span>);<br>        <span class="hljs-comment">//2.模拟下单</span><br>        System.out.println(<span class="hljs-string">&quot;张三:下单成功,商品信息为：&quot;</span>+info);<br>        <span class="hljs-comment">//3.模拟返回成功信息</span><br>        <span class="hljs-comment">//4.模拟配置信息获取 打印</span><br>        System.out.println(<span class="hljs-string">&quot;值为：&quot;</span>+url);<br><br>        <span class="hljs-keyword">return</span> info;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>浏览器中输入：<a target="_blank" rel="noopener" href="http://localhost:8080/doOrder">http://localhost:8080/doOrder</a></p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-39bd75c2dcb744b0841fd183082e8d49_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>再次修改配置中心的配置值</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-e50047b49d5283ef8d0f5e640f7daf9a_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<p>再发送请求：</p>
+<p><img src="/2023/08/21/Spring-Cloud-Alibaba%E5%AE%9E%E6%88%98%EF%BC%8C%E4%BB%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%9F%BA%E6%9C%AC%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%EF%BC%88%E6%BA%90%E7%A0%81%EF%BC%89/v2-83115691996453c3cacf91c52e67928c_1440w.jpg" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h2 id="7-总结"><a href="#7-总结" class="headerlink" title="7 总结"></a>7 总结</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">讲解了如下内容：<br>什么是微服务架构,<br>springcloud是什么以及springcloud aliaba是什么及他们的关系<br>spring cloud alibaba的入门实战 实现：<br>	远程调用<br>	服务发现和注册<br>	服务的配置<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/JAVA/" class="category-chain-item">JAVA</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/JAVA/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" class="category-chain-item">微服务</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/JAVA/" class="print-no-link">#JAVA</a>
+      
+        <a href="/tags/springCloud/" class="print-no-link">#springCloud</a>
+      
+        <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" class="print-no-link">#微服务</a>
+      
+        <a href="/tags/springCloudAlibaba/" class="print-no-link">#springCloudAlibaba</a>
+      
+        <a href="/tags/Nacos/" class="print-no-link">#Nacos</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Spring Cloud Alibaba实战，从微服务架构到基本服务配置（源码）</div>
+      <div>https://aotomata.me/2023/08/21/Spring-Cloud-Alibaba实战，从微服务架构到基本服务配置（源码）/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>吕书科</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年8月21日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/12/30/G219%E7%89%B9%E5%88%AB%E9%94%A6%E9%9B%86/" title="G219特别锦集">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">G219特别锦集</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/04/30/JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98/" title="JVM调优实战">
+                        <span class="hidden-mobile">JVM调优实战</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
